@@ -122,6 +122,52 @@ function readRouteFile(e) {
 	reader.readAsText(file);
 }
 
+function displayNodes(nodes) {  
+    var nodeIDs = [];
+    var node_link_part = "http://www.openstreetmap.org/api/0.6/node/";
+    // get platforms from OSM relation
+    for(var node = 0; node < nodes.length; node++){
+		if (nodes[node].getAttribute("role")==="platform"){
+			nodeIDs.push(nodes[node].getAttribute("ref"));
+		}
+    }
+    // display map
+	var mymap = L.map('mapid').setView([44.40, 26.1], 13); // center pe traseu!!
+
+	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(mymap);
+    // get platform data
+    for(var node = 0; node < nodeIDs.length; node++){
+    	var link = node_link_part + nodeIDs[node];
+    	var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+	    if (this.readyState == 4 && this.status == 200) {
+	    	var xmlDoc = this.responseXML;
+	    	var lat = xmlDoc.getElementsByTagName("node")[0].getAttribute("lat");
+	    	var lon = xmlDoc.getElementsByTagName("node")[0].getAttribute("lon");
+	    	var children = xmlDoc.getElementsByTagName("node")[0].getElementsByTagName("tag");
+	    	var name = '';
+	    	for(var child = 0; child < children.length; child++){
+	    		if (children[child].getAttribute("k")==="name"){
+	    			name = children[child].getAttribute("v");
+	    			}
+	    		}
+	    	// display platforms
+	    	var circle = L.circle([lat, lon], {
+			    color: 'red',
+			    fillColor: '#f03',
+			    fillOpacity: 0.5,
+			    radius: 50
+			}).addTo(mymap)
+			  .bindPopup(name);
+			}
+		};
+		xhttp.open("GET", link, true);
+		xhttp.send();
+    }
+}
+
 function readTimerFile(e) {
 	var file = e.target.files[0];
 	if (!file) {
@@ -149,93 +195,29 @@ function readTimerFile(e) {
 		var stops_lengths = [];
 		var total_distance = 0;
 
-		var nodeIDs = [];
-		var lats = [];
-		var lons = [];
-		var platf_names = [];
-
-
 
 		// read chosen route
-		// http://stackoverflow.com/questions/1085801/get-selected-value-in-dropdown-list-using-javascript
 		var e = document.getElementById("route");
 		var routeID = e.options[e.selectedIndex].value;
 		var routeName = e.options[e.selectedIndex].text;
-
 		var rel_link = "http://www.openstreetmap.org/api/0.6/relation/" + routeID;
 		var link_part_1 = "http://overpass-api.de/api/interpreter?data=relation(";
 		var link_part_2 =");node(r)[highway=bus_stop];out body;";
 		var final_link = link_part_1 + routeID + link_part_2;
-		var node_link_part = "http://www.openstreetmap.org/api/0.6/node/";
 
-		//obtain ordered platform list
+		//obtain platform list and display on the map
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {
 		    if (this.readyState == 4 && this.status == 200) {
-		    relFunction(this);
+		    
+		    var xmlDoc = this.responseXML;
+		    var nodes = xmlDoc.getElementsByTagName("member");
+		    displayNodes(nodes);   
 		    }
 		};
 		xhttp.open("GET", rel_link, true);
-		xhttp.send();		
+		xhttp.send();
 
-		function relFunction(xml) {
-		    var xmlDoc = xml.responseXML;
-		    var nodes = xmlDoc.getElementsByTagName("member");
-		    // get platforms from OSM relation
-		    for(var node = 0; node < nodes.length; node++){
-	    		if (nodes[node].getAttribute("role")==="platform"){
-					nodeIDs.push(nodes[node].getAttribute("ref"));
-	    		}
-
-		    }
-		    // get platform data
-		    for(var node = 0; node < nodeIDs.length; node++){
-		    	var link = node_link_part + nodeIDs[node];
-		    	var xhttp = new XMLHttpRequest();
-				
-				xhttp.onreadystatechange = function() {
-			    if (this.readyState == 4 && this.status == 200) {
-			    	var xmlDoc = this.responseXML;
-			    	var lat = xmlDoc.getElementsByTagName("node")[0].getAttribute("lat");
-			    	var lon = xmlDoc.getElementsByTagName("node")[0].getAttribute("lon");
-			    	var children = xmlDoc.getElementsByTagName("node")[0].getElementsByTagName("tag");
-			    	var name = '';
-			    	for(var child = 0; child < children.length; child++){
-			    		if (children[child].getAttribute("k")==="name"){
-			    			name = children[child].getAttribute("v");
-			    			}
-			    		}
-			    	lats.push(parseFloat(lat));
-			    	lons.push(parseFloat(lon));
-			    	platf_names.push(name);
-			    	// display platforms
-			    	var circle = L.circle([lat, lon], {
-					    color: 'red',
-					    fillColor: '#f03',
-					    fillOpacity: 0.5,
-					    radius: 50
-					}).addTo(mymap)
-					  .bindPopup(name)
-					  .openPopup();
-					}
-				};
-
-				xhttp.open("GET", link, true);
-				xhttp.send();
-		    }
-	    	// display map
-	    	var mymap = L.map('mapid').setView([44.45, 26.1], 12); // center pe traseu!!
-
-			L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-				attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-			}).addTo(mymap);
-
-
-		}
-
-
-
-		
 		// process date_traseu
 		var traseu_stops = date_traseu.split('\n');
 		for (var k = 1; k < traseu_stops.length; k++){
@@ -340,12 +322,8 @@ function readTimerFile(e) {
 	};
 	reader.readAsText(file);
 }
-
 document.getElementById('timer-file-input').addEventListener('change', readTimerFile, false);
 document.getElementById('route-file-input').addEventListener('change', readRouteFile, false);
-
-
 </script>
-
 </body>
 </html>
