@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"> 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+<style type="text/css">
+	/*http://stackoverflow.com/questions/3053205/how-create-table-only-using-div-tag-and-css*/
+    .datatable
+    {
+        display:  table;
+        width:100%;
+        table-layout: auto;
+        background-color:#eee;
+        /*border:1px solid  #666666;*/
+        border-spacing:5px;/*cellspacing:poor IE support for  this*/
+       /* border-collapse:separate;*/
+    }
+    .datarow
+    {
+       display:table-row;
+       width:auto;
+    }
+    .headerrow
+    {
+       display:table-row;
+       width:auto;
+       font-weight:bold;
+    }
+    .datacell
+    {
+        float:left;/*fix for  buggy browsers*/
+        display:table-column;
+        width: 14.2857%;
+        /*width:200px;*/
+        /*background-color:#ccc;*/
+    }
+</style>
+</head>
+<body>
+
+<div><canvas id="adjCanvas" width="100" height="180"
+style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas></div>
+
+<div>
+<select id="route">
+  <option value="3307307" selected="selected">Bus 117: Piața Sfânta Vineri => Cartier Confort Urban</option>
+  <option value="3307287">Bus 117: Cartier Confort Urban => Piața Sfânta Vineri </option>
+</select>
+<h4>Încărcare date traseu: <input type="file" id="route-file-input" /></h4>
+<h4>Încărcare cronometrare: <input type="file" id="timer-file-input" /></h4>
+<h3>Sumar traseu:</h3>
+<div id="file-content"></div>
+</div>
+
+<div style="height: 700px; width: auto; margin: 0px;" id="mapid"></div>
+
+<script>
+var barwidth = 80;
+var barstart_x = 10;
+var barstart_y = 10;
+var text_width = 9;
+var date_traseu = '';
+var max_speed = 40; //km/h
+
+function get_seconds(timestring){
+	var a = timestring.split(':');
+	var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + Math.round((+a[2]));
+	return seconds;
+	}
+
+function convert_from_seconds(seconds){
+	var minutes = Math.floor(seconds/60);
+	seconds = seconds % 60;
+	var hours = Math.floor(minutes/60);
+	minutes = minutes % 60;
+	if (hours === 1){
+		var text_time = hours + ' oră, ' + minutes + ' minute, ' + seconds + ' secunde';}
+	else {
+		var text_time = hours + ' ore, ' + minutes + ' minute, ' + seconds + ' secunde';}
+	return text_time;
+	}
+
+function addSegment(ctx, increment, color, x_pos, y_pos, bar_width){
+	ctx.fillStyle = color;
+	ctx.fillRect(x_pos, y_pos, increment, bar_width);
+	}
+
+function addLabel(ctx, stop_name, position) {
+	ctx.save();
+	ctx.fillStyle = "black";
+	ctx.translate(position + text_width, barstart_y + 2*barwidth);
+	ctx.rotate(-Math.PI/2);
+	ctx.fillText(stop_name,0, 0);
+	ctx.restore();
+	}
+
+function displayContents(contents) {
+	var element = document.getElementById('file-content');
+	element.innerHTML = contents;
+}
+
+function add_data_cell(text) {
+	var data_cell = document.createElement("DIV");
+	data_cell.className = "datacell";
+	data_text = document.createTextNode(text);
+	data_cell.appendChild(data_text);
+	return data_cell;
+}
+
+function readRouteFile(e) {
+	var file = e.target.files[0];
+	if (!file) {
+		return
+	}
+	var reader = new FileReader();
+	reader.onload = function (e) {
+		var contents = e.target.result;
+		date_traseu = contents;
+	};
+	reader.readAsText(file);
+}
+
+function readTimerFile(e) {
+	var file = e.target.files[0];
+	if (!file) {
+		return
+	}
+	var reader = new FileReader();
+	reader.onload = function (e) {
+		var contents = e.target.result;
+		var lines = contents.split('\n');
+
+		var adj_c = document.getElementById("adjCanvas");
+		var adj_ctx = adj_c.getContext("2d");
+		adj_ctx.canvas.width  = window.innerWidth - 30;
+		adj_ctx.clearRect(0, 0, adj_ctx.canvas.width, adj_ctx.canvas.height);
+		adj_ctx.font = "10px Arial";
+
+		var durations = [];
+		var laps = [];
+		var interstation_moves = [];
+		var interstation_stops = [];
+		var stops_times = [];
+		var total_duration = 0;
+		var label_positions = [];
+		var stops_names = [];
+		var stops_lengths = [];
+		var total_distance = 0;
+
+		var nodeIDs = [];
+		var lats = [];
+		var lons = [];
+		var platf_names = [];
+
+
+
+		// read chosen route
+		// http://stackoverflow.com/questions/1085801/get-selected-value-in-dropdown-list-using-javascript
+		var e = document.getElementById("route");
+		var routeID = e.options[e.selectedIndex].value;
+		var routeName = e.options[e.selectedIndex].text;
+
+		var rel_link = "http://www.openstreetmap.org/api/0.6/relation/" + routeID;
+		var link_part_1 = "http://overpass-api.de/api/interpreter?data=relation(";
+		var link_part_2 =");node(r)[highway=bus_stop];out body;";
+		var final_link = link_part_1 + routeID + link_part_2;
+		var node_link_part = "http://www.openstreetmap.org/api/0.6/node/";
+
+		//obtain ordered platform list
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+		    if (this.readyState == 4 && this.status == 200) {
+		    relFunction(this);
+		    }
+		};
+		xhttp.open("GET", rel_link, true);
+		xhttp.send();		
+
+		function relFunction(xml) {
+		    var xmlDoc = xml.responseXML;
+		    var nodes = xmlDoc.getElementsByTagName("member");
+		    // get platforms from OSM relation
+		    for(var node = 0; node < nodes.length; node++){
+	    		if (nodes[node].getAttribute("role")==="platform"){
+					nodeIDs.push(nodes[node].getAttribute("ref"));
+	    		}
+
+		    }
+		    // get platform data
+		    for(var node = 0; node < nodeIDs.length; node++){
+		    	var link = node_link_part + nodeIDs[node];
+		    	var xhttp = new XMLHttpRequest();
+				
+				xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+			    	var xmlDoc = this.responseXML;
+			    	var lat = xmlDoc.getElementsByTagName("node")[0].getAttribute("lat");
+			    	var lon = xmlDoc.getElementsByTagName("node")[0].getAttribute("lon");
+			    	var children = xmlDoc.getElementsByTagName("node")[0].getElementsByTagName("tag");
+			    	var name = '';
+			    	for(var child = 0; child < children.length; child++){
+			    		if (children[child].getAttribute("k")==="name"){
+			    			name = children[child].getAttribute("v");
+			    			}
+			    		}
+			    	lats.push(parseFloat(lat));
+			    	lons.push(parseFloat(lon));
+			    	platf_names.push(name);
+			    	// display platforms
+			    	var circle = L.circle([lat, lon], {
+					    color: 'red',
+					    fillColor: '#f03',
+					    fillOpacity: 0.5,
+					    radius: 50
+					}).addTo(mymap)
+					  .bindPopup(name)
+					  .openPopup();
+					}
+				};
+
+				xhttp.open("GET", link, true);
+				xhttp.send();
+		    }
+	    	// display map
+	    	var mymap = L.map('mapid').setView([44.45, 26.1], 12); // center pe traseu!!
+
+			L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+			}).addTo(mymap);
+
+
+		}
+
+
+
+		
+		// process date_traseu
+		var traseu_stops = date_traseu.split('\n');
+		for (var k = 1; k < traseu_stops.length; k++){
+			var temp = parseFloat(traseu_stops[k].split('\t')[1]);
+			stops_lengths.push(temp);
+			total_distance += temp;
+		}
+
+		// create arrays of lap names and durations
+		for(var line = lines.length ; line > 0; line--){
+			var str = lines[line-1];
+			if (str.startsWith('Lap Time')){
+				str = str.split(': ')[1];
+				durations.push(str);
+				}
+			if (str.startsWith('Lap Description')){
+				str = str.split(': ')[1];
+				laps.push(str);
+				}
+			}
+		// get total duration of laps
+		for(var lap = 0; lap < laps.length; lap++){
+			var duration = get_seconds(durations[lap]);
+			total_duration += duration;
+		}
+		// create chart
+		var current = barstart_x;
+		for(var lap = 0; lap < laps.length; lap++){
+			var str = laps[lap];
+			str = str.substring(0, str.length -1);
+			var abs_duration = get_seconds(durations[lap])
+			var duration = Math.round(abs_duration * (adj_ctx.canvas.width - 20) / total_duration);
+			
+			switch (str.substring(0, 1)){
+				case '*':
+					addSegment(adj_ctx, duration, 'red', current, barstart_y, barwidth);
+					current += duration;
+					interstation_stops[interstation_stops.length - 1] += abs_duration;
+					break;
+				case '@':
+					stops_names.push(str.substring(1));
+					label_positions.push(current);
+					addSegment(adj_ctx, duration, 'aqua', current, barstart_y, 2*barwidth);
+					current += duration;
+					interstation_moves.push(0);
+					interstation_stops.push(0);
+					stops_times.push(abs_duration);
+					break;
+				case '+':
+					addSegment(adj_ctx, duration, 'green', current, barstart_y, barwidth);
+					current += duration;
+					interstation_moves[interstation_moves.length - 1] += abs_duration;
+					break;
+				default:
+					addSegment(adj_ctx, duration, 'black', current, barstart_y, 2*barwidth);
+					current += duration;
+			}
+		}
+		// Add stop labels and display output data
+		var data_table = document.createElement("DIV");
+		data_table.className = "datatable";
+		// header row
+		var header_row = document.createElement("DIV");
+		header_row.className = "headerrow";
+		header_row.appendChild(add_data_cell("De la"));
+		header_row.appendChild(add_data_cell("La"));
+		header_row.appendChild(add_data_cell("Distanță (km)"));
+		header_row.appendChild(add_data_cell("Total (s)"));
+		header_row.appendChild(add_data_cell("D/c stație (s)"));
+		header_row.appendChild(add_data_cell("V (km/h)"));
+		header_row.appendChild(add_data_cell("Pondere (%)"));
+		data_table.appendChild(header_row);
+
+		for (var stop = 0; stop < stops_names.length; stop++){
+			addLabel(adj_ctx, stops_names[stop], label_positions[stop]);
+		}
+		for (var stop = 0; stop < stops_names.length - 1; stop++){
+			var data_row = document.createElement("DIV");
+			data_row.className = "datarow";
+			data_row.appendChild(add_data_cell(stops_names[stop]));
+			data_row.appendChild(add_data_cell(stops_names[stop+1]));
+			data_row.appendChild(add_data_cell(stops_lengths[stop]));
+			var total_interstation = interstation_moves[stop] +interstation_stops[stop] + stops_times[stop];
+			data_row.appendChild(add_data_cell(total_interstation));
+			data_row.appendChild(add_data_cell(stops_times[stop]));
+			var speed = Math.round((stops_lengths[stop]/(total_interstation-stops_times[stop]))*3600*10)/10;
+			data_row.appendChild(add_data_cell(speed));
+			var green = Math.min(Math.round(2*255*speed/max_speed), 255);
+			var red = Math.min(Math.max(0,Math.round(2*255*(1-speed/max_speed))), 255);
+			data_row.style.backgroundColor = "rgb(" + red +"," + green + ",0)";
+			var perc = Math.round((total_interstation*100/total_duration)*10)/10;
+			data_row.appendChild(add_data_cell(perc));
+			data_table.appendChild(data_row);
+		}
+		var rezumat = '';
+		rezumat += 'Timp total: ' + convert_from_seconds(total_duration) + '.\n';
+		rezumat += 'Distanță totală: ' + Math.round(total_distance*10)/10 + ' km.\n';
+		rezumat += 'Viteză medie: ' + Math.round((total_distance/total_duration)*3600*10)/10 + ' km/h.\n';
+		displayContents(rezumat);
+
+		document.getElementsByTagName('body')[0].insertBefore(data_table, document.getElementById('mapid'));
+	};
+	reader.readAsText(file);
+}
+
+document.getElementById('timer-file-input').addEventListener('change', readTimerFile, false);
+document.getElementById('route-file-input').addEventListener('change', readRouteFile, false);
+
+
+</script>
+
+</body>
+</html>
