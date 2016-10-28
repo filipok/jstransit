@@ -349,6 +349,7 @@ function readTimerFile(e) {
 	    		alert("ERROR: WAYS NOT CONNECTED!");
 
 		    }
+		    // create lat and long arrays for the route
 		    for(var p = 0; p < waypoint_refs.length; p++){
 		    	var selector = '[id="' + waypoint_refs[p] + '"]';
 		    	var platform = xmlDoc.querySelectorAll(selector)[0];
@@ -363,6 +364,7 @@ function readTimerFile(e) {
 		    }
 		    // TODO aici pot face un map.setView() după un getBounds() sau
 		    // din coords cu max/min
+		    // actually display the route
 		    var polyline = L.polyline(coords, {color: 'red'}).addTo(mymap);
 
 		    
@@ -388,13 +390,11 @@ function readTimerFile(e) {
 				
 		    }
 		    console.log(names.length, " stații descărcate de pe OSM.");
-
-
-		    }
-		};
+		    } // end main if
+		}; // end onreadystatechange function definition
 		xhttp.open("GET", overpass_full, true);
 		xhttp.send();
-	};
+	}; // end onload function definition
 	reader.readAsText(file);
 }
 document.getElementById('timer-file-input').addEventListener('change', readTimerFile, false);
