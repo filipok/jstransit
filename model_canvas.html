@@ -122,52 +122,6 @@ function readRouteFile(e) {
 	reader.readAsText(file);
 }
 
-function displayNodes(nodes) {  
-    var nodeIDs = [];
-    var node_link_part = "http://www.openstreetmap.org/api/0.6/node/";
-    // get platforms from OSM relation
-    for(var node = 0; node < nodes.length; node++){
-		if (nodes[node].getAttribute("role")==="platform"){
-			nodeIDs.push(nodes[node].getAttribute("ref"));
-		}
-    }
-    // display map
-	var mymap = L.map('mapid').setView([44.40, 26.1], 13); // center pe traseu!!
-
-	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-	}).addTo(mymap);
-    // get platform data
-    for(var node = 0; node < nodeIDs.length; node++){
-    	var link = node_link_part + nodeIDs[node];
-    	var xhttp = new XMLHttpRequest();
-		xhttp.onreadystatechange = function() {
-	    if (this.readyState == 4 && this.status == 200) {
-	    	var xmlDoc = this.responseXML;
-	    	var lat = xmlDoc.getElementsByTagName("node")[0].getAttribute("lat");
-	    	var lon = xmlDoc.getElementsByTagName("node")[0].getAttribute("lon");
-	    	var children = xmlDoc.getElementsByTagName("node")[0].getElementsByTagName("tag");
-	    	var name = '';
-	    	for(var child = 0; child < children.length; child++){
-	    		if (children[child].getAttribute("k")==="name"){
-	    			name = children[child].getAttribute("v");
-	    			}
-	    		}
-	    	// display platforms
-	    	var circle = L.circle([lat, lon], {
-			    color: 'red',
-			    fillColor: '#f03',
-			    fillOpacity: 0.5,
-			    radius: 50
-			}).addTo(mymap)
-			  .bindPopup(name);
-			}
-		};
-		xhttp.open("GET", link, true);
-		xhttp.send();
-    }
-}
-
 function readTimerFile(e) {
 	var file = e.target.files[0];
 	if (!file) {
@@ -195,28 +149,17 @@ function readTimerFile(e) {
 		var stops_lengths = [];
 		var total_distance = 0;
 
+		var plat_refs = [];
+		var way_refs = [];
+		var waypoint_refs = [];
+		var lats =[];
+		var longs = [];
+		var names = [];
+		var point_lats = [];
+		var point_longs = [];
 
-		// read chosen route
-		var e = document.getElementById("route");
-		var routeID = e.options[e.selectedIndex].value;
-		var routeName = e.options[e.selectedIndex].text;
-		var rel_link = "http://www.openstreetmap.org/api/0.6/relation/" + routeID;
-		var link_part_1 = "http://overpass-api.de/api/interpreter?data=relation(";
-		var link_part_2 =");node(r)[highway=bus_stop];out body;";
-		var final_link = link_part_1 + routeID + link_part_2;
 
-		//obtain platform list and display on the map
-		var xhttp = new XMLHttpRequest();
-		xhttp.onreadystatechange = function() {
-		    if (this.readyState == 4 && this.status == 200) {
-		    
-		    var xmlDoc = this.responseXML;
-		    var nodes = xmlDoc.getElementsByTagName("member");
-		    displayNodes(nodes);   
-		    }
-		};
-		xhttp.open("GET", rel_link, true);
-		xhttp.send();
+
 
 		// process date_traseu
 		var traseu_stops = date_traseu.split('\n');
@@ -276,6 +219,7 @@ function readTimerFile(e) {
 					current += duration;
 			}
 		}
+		console.log(stops_times.length, " stații cronometrate.");
 		// Add stop labels and display output data
 		var data_table = document.createElement("DIV");
 		data_table.className = "datatable";
@@ -319,6 +263,94 @@ function readTimerFile(e) {
 		displayContents(rezumat);
 
 		document.getElementsByTagName('body')[0].insertBefore(data_table, document.getElementById('mapid'));
+
+		// read chosen route
+		var e = document.getElementById("route");
+		var routeID = e.options[e.selectedIndex].value;
+		//var routeName = e.options[e.selectedIndex].text;
+		var overpass_1 = "http://overpass-api.de/api/interpreter?data=relation(";
+		var overpass_2 =");out body;>;out body;"; 
+		var overpass_full = overpass_1 + routeID + overpass_2;
+
+		//obtain platform list and display on the map
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+		    if (this.readyState == 4 && this.status == 200) {
+		    
+		    var xmlDoc = this.responseXML;
+
+		    // create map
+		    var mymap = L.map('mapid').setView([44.40, 26.1], 13); // center pe traseu!!
+			L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+			}).addTo(mymap);
+
+		    // get platform refs
+		    var relation = xmlDoc.getElementsByTagName("relation")[0];
+		    var platforms = relation.querySelectorAll('[role="platform"]');
+		    for(var p = 0; p < platforms.length; p++){
+		    	plat_refs.push(platforms[p].getAttribute("ref"));
+		    }
+		    // get platform names and coordinates and display them
+		    var all_nodes = xmlDoc.getElementsByTagName("node");
+		    for(var p = 0; p < plat_refs.length; p++){
+		    	var selector = '[id="' + plat_refs[p].toString() + '"]';
+		    	var platform = xmlDoc.querySelectorAll(selector)[0];
+		    	var lat = parseFloat(platform.getAttribute("lat"));
+		    	lats.push(lat);
+		    	var lon = parseFloat(platform.getAttribute("lon"));
+		    	longs.push(lon);
+		    	var name = platform.querySelectorAll('[k="name"]')[0].getAttribute("v");
+		    	names.push(name);
+		    	// display platforms
+		    	var circle = L.circle([lat, lon], {
+				    color: 'blue',
+				    fillColor: '#0000FF',
+				    fillOpacity: 0.5,
+				    radius: 15*Math.max(1.5, Math.sqrt(stops_times[p]))
+				}).addTo(mymap)
+				  .bindPopup(name);
+				
+		    }
+		    console.log(names.length, " stații descărcate de pe OSM.");
+
+		    // get ways and display route
+		    var ways = relation.querySelectorAll('[type="way"]');
+		    for(var p = 0; p < ways.length; p++){
+		    	way_refs.push(ways[p].getAttribute("ref"));
+		    }
+		    for(var p = 0; p < way_refs.length; p++){
+		    	var selector = '[id="' + way_refs[p] + '"]';
+		    	var way = xmlDoc.querySelectorAll(selector)[0];
+		    	var way_points = way.getElementsByTagName("nd");
+		    	for (var w = 0; w < way_points.length; w ++){
+		    		var ref = way_points[w].getAttribute("ref");
+		    		waypoint_refs.push(ref);
+		    	}
+		    }
+		    for(var p = 0; p < waypoint_refs.length; p++){
+		    	var selector = '[id="' + waypoint_refs[p] + '"]';
+		    	var platform = xmlDoc.querySelectorAll(selector)[0];
+		    	var lat = parseFloat(platform.getAttribute("lat"));
+		    	point_lats.push(lat);
+		    	var lon = parseFloat(platform.getAttribute("lon"));
+		    	point_longs.push(lon);
+		    }
+		    console.log(point_longs);
+		    console.log(point_lats);
+		    var coords = [];
+		    for(var m = 0; m < point_lats.length; m++){
+		    	coords.push([point_lats[m], point_longs[m]]);
+		    }
+		    console.log(coords);
+		    var polygon = L.polyline(coords).addTo(mymap);
+
+
+
+		    }
+		};
+		xhttp.open("GET", overpass_full, true);
+		xhttp.send();
 	};
 	reader.readAsText(file);
 }
