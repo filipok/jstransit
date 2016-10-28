@@ -109,6 +109,10 @@ function add_data_cell(text) {
 	return data_cell;
 }
 
+function euclidean_distance(x, y, a, b){
+	return Math.sqrt(Math.pow(a-x, 2) + Math.pow(b-y, 2));
+}
+
 function readRouteFile(e) {
 	var file = e.target.files[0];
 	if (!file) {
