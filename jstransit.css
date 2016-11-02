@@ -1,0 +1,31 @@
+
+/*http://stackoverflow.com/questions/3053205/how-create-table-only-using-div-tag-and-css*/
+.datatable
+{
+    display:  table;
+    width:100%;
+    table-layout: auto;
+    background-color:#eee;
+    /*border:1px solid  #666666;*/
+    border-spacing:5px;/*cellspacing:poor IE support for  this*/
+   /* border-collapse:separate;*/
+}
+.datarow
+{
+   display:table-row;
+   width:auto;
+}
+.headerrow
+{
+   display:table-row;
+   width:auto;
+   font-weight:bold;
+}
+.datacell
+{
+    float:left;/*fix for  buggy browsers*/
+    display:table-column;
+    width: 14.2857%;
+    /*width:200px;*/
+    /*background-color:#ccc;*/
+}
