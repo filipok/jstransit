@@ -272,8 +272,8 @@ function readTimerFile(e) {
 		var e = document.getElementById("route");
 		var routeID = e.options[e.selectedIndex].value;
 		//var routeName = e.options[e.selectedIndex].text;
-		var overpass_1 = "http://overpass-api.de/api/interpreter?data=relation(";
-		var overpass_2 =");out body;>;out body;"; 
+		var overpass_1 = 'http://overpass-api.de/api/interpreter?data=relation(';
+		var overpass_2 =');out body;>;out body;rel(bn)["public_transport"="stop_area"];out body;'; 
 		var overpass_full = overpass_1 + routeID + overpass_2;
 
 		//obtain platform list and display on the map
