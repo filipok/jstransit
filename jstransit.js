@@ -8,7 +8,7 @@ var max_speed = 40; //km/h
 function get_seconds(timestring){
     var a = timestring.split(':');
     return (+a[0]) * 60 * 60 + (+a[1]) * 60 + Math.round((+a[2]));
-    }
+}
 
 function convert_from_seconds(seconds){
     var minutes = Math.floor(seconds/60);
@@ -19,12 +19,12 @@ function convert_from_seconds(seconds){
         return hours + ' oră, ' + minutes + ' minute, ' + seconds + ' secunde';}
     else {
         return hours + ' ore, ' + minutes + ' minute, ' + seconds + ' secunde';}
-    }
+}
 
 function addSegment(ctx, increment, color, x_pos, y_pos, bar_width){
     ctx.fillStyle = color;
     ctx.fillRect(x_pos, y_pos, increment, bar_width);
-    }
+}
 
 function addLabel(ctx, stop_name, position) {
     ctx.save();
@@ -33,7 +33,7 @@ function addLabel(ctx, stop_name, position) {
     ctx.rotate(-Math.PI/2);
     ctx.fillText(stop_name,0, 0);
     ctx.restore();
-    }
+}
 
 function displayContents(contents) {
     var element = document.getElementById('file-content');
@@ -118,12 +118,12 @@ function readTimerFile(e) {
             if (str.startsWith('Lap Time')){
                 str = str.split(': ')[1];
                 durations.push(str);
-                }
+            }
             if (str.startsWith('Lap Description')){
                 str = str.split(': ')[1];
                 laps.push(str);
-                }
             }
+        }
         // get total duration of laps
         for(lap = 0; lap < laps.length; lap++){
             duration = get_seconds(durations[lap]);
@@ -136,7 +136,7 @@ function readTimerFile(e) {
             str = str.substring(0, str.length -1);
             var abs_duration = get_seconds(durations[lap]);
             duration = Math.round(abs_duration * (adj_ctx.canvas.width - 20) / total_duration);
-            
+
             switch (str.substring(0, 1)){
                 case '*':
                     addSegment(adj_ctx, duration, 'red', current, barstart_y, barwidth);
@@ -213,125 +213,125 @@ function readTimerFile(e) {
         var routeID = r.options[r.selectedIndex].value;
         //var routeName = r.options[r.selectedIndex].text;
         var overpass_1 = 'http://overpass-api.de/api/interpreter?data=relation(';
-        var overpass_2 =');out body;>;out body;rel(bn)["public_transport"="stop_area"];out body;'; 
+        var overpass_2 =');out body;>;out body;rel(bn)["public_transport"="stop_area"];out body;';
         var overpass_full = overpass_1 + routeID + overpass_2;
 
         //obtain platform list and display on the map
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-            
-            var xmlDoc = this.responseXML;
 
-            // create map
-            var mymap = L.map('mapid').setView([44.40, 26.1], 13); // center pe traseu!!
-            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(mymap);
-            // extract relation element            
-            var relation = xmlDoc.getElementsByTagName("relation")[0];
-            
-            // get platform refs
-            var p, selector, platform, lat, lon;
-            var platforms = relation.querySelectorAll('[role="platform"]');
-            for(p = 0; p < platforms.length; p++){
-                plat_refs.push(platforms[p].getAttribute("ref"));
-            }
+                var xmlDoc = this.responseXML;
+
+                // create map
+                var mymap = L.map('mapid').setView([44.40, 26.1], 13); // center pe traseu!!
+                L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(mymap);
+                // extract relation element
+                var relation = xmlDoc.getElementsByTagName("relation")[0];
+
+                // get platform refs
+                var p, selector, platform, lat, lon;
+                var platforms = relation.querySelectorAll('[role="platform"]');
+                for(p = 0; p < platforms.length; p++){
+                    plat_refs.push(platforms[p].getAttribute("ref"));
+                }
 
 
-            // get ways and display route
-            var ways = relation.querySelectorAll('[type="way"]');
-            // get way refs
-            for(p = 0; p < ways.length; p++){
-                way_refs.push(ways[p].getAttribute("ref"));
-            }
-            // for each way, get point and add to route
-            for(p = 0; p < way_refs.length; p++){
-                selector = '[id="' + way_refs[p] + '"]';
-                var way = xmlDoc.querySelectorAll(selector)[0];
-                var current_points = [];
-                var way_points = way.getElementsByTagName("nd");
-                for (var w = 0; w < way_points.length; w ++){
-                    var ref = way_points[w].getAttribute("ref");
-                    current_points.push(ref);
-                    //waypoint_refs.push(ref);
+                // get ways and display route
+                var ways = relation.querySelectorAll('[type="way"]');
+                // get way refs
+                for(p = 0; p < ways.length; p++){
+                    way_refs.push(ways[p].getAttribute("ref"));
+                }
+                // for each way, get point and add to route
+                for(p = 0; p < way_refs.length; p++){
+                    selector = '[id="' + way_refs[p] + '"]';
+                    var way = xmlDoc.querySelectorAll(selector)[0];
+                    var current_points = [];
+                    var way_points = way.getElementsByTagName("nd");
+                    for (var w = 0; w < way_points.length; w ++){
+                        var ref = way_points[w].getAttribute("ref");
+                        current_points.push(ref);
+                        //waypoint_refs.push(ref);
+
+                    }
+                    // first segment
+                    if(p === 0){
+                        waypoint_refs = waypoint_refs.concat(current_points);
+                        continue;
+                    }
+                    // last route point === first point of current segment
+                    if(waypoint_refs[waypoint_refs.length-1] === current_points[0]){
+                        waypoint_refs = waypoint_refs.concat(current_points);
+                        continue;
+                    }
+                    // last route point === last point of current segment
+                    if(waypoint_refs[waypoint_refs.length-1] === current_points[current_points.length-1]){
+                        waypoint_refs = waypoint_refs.concat(current_points.reverse());
+                        continue;
+                    }
+                    // first route point === first point  of current segment
+                    // it can happen only immediately after first segment
+                    if(waypoint_refs[0] === current_points[0]){
+                        waypoint_refs = waypoint_refs.reverse();
+                        waypoint_refs = waypoint_refs.concat(current_points);
+                        continue;
+                    }
+                    // first route point === last point of current segment
+                    // it can happen only immediately after first segment
+                    if(waypoint_refs[0] === current_points[current_points.length-1]){
+                        waypoint_refs = waypoint_refs.reverse();
+                        waypoint_refs = waypoint_refs.concat(current_points.reverse());
+                        continue;
+                    }
+                    console.log("ERROR: WAYS NOT CONNECTED!");
+                    alert("ERROR: WAYS NOT CONNECTED!");
 
                 }
-                // first segment
-                if(p === 0){
-                    waypoint_refs = waypoint_refs.concat(current_points);
-                    continue;
+                // create lat and long arrays for the route
+                for(p = 0; p < waypoint_refs.length; p++){
+                    selector = '[id="' + waypoint_refs[p] + '"]';
+                    platform = xmlDoc.querySelectorAll(selector)[0];
+                    lat = parseFloat(platform.getAttribute("lat"));
+                    point_lats.push(lat);
+                    lon = parseFloat(platform.getAttribute("lon"));
+                    point_longs.push(lon);
                 }
-                // last route point === first point of current segment
-                if(waypoint_refs[waypoint_refs.length-1] === current_points[0]){
-                    waypoint_refs = waypoint_refs.concat(current_points);
-                    continue;
+                var coords = [];
+                for(var m = 0; m < point_lats.length; m++){
+                    coords.push([point_lats[m], point_longs[m]]);
                 }
-                // last route point === last point of current segment
-                if(waypoint_refs[waypoint_refs.length-1] === current_points[current_points.length-1]){
-                    waypoint_refs = waypoint_refs.concat(current_points.reverse());
-                    continue;
-                }
-                // first route point === first point  of current segment
-                // it can happen only immediately after first segment
-                if(waypoint_refs[0] === current_points[0]){
-                    waypoint_refs = waypoint_refs.reverse();
-                    waypoint_refs = waypoint_refs.concat(current_points);
-                    continue;
-                }
-                // first route point === last point of current segment
-                // it can happen only immediately after first segment
-                if(waypoint_refs[0] === current_points[current_points.length-1]){
-                    waypoint_refs = waypoint_refs.reverse();
-                    waypoint_refs = waypoint_refs.concat(current_points.reverse());
-                    continue;
-                }
-                console.log("ERROR: WAYS NOT CONNECTED!");
-                alert("ERROR: WAYS NOT CONNECTED!");
+                // TODO map.setView() after getBounds() or
+                // TODO from coordinates with max/min
+                // actually display the route
+                var polyline = L.polyline(coords, {color: 'red'}).addTo(mymap);
 
-            }
-            // create lat and long arrays for the route
-            for(p = 0; p < waypoint_refs.length; p++){
-                selector = '[id="' + waypoint_refs[p] + '"]';
-                platform = xmlDoc.querySelectorAll(selector)[0];
-                lat = parseFloat(platform.getAttribute("lat"));
-                point_lats.push(lat);
-                lon = parseFloat(platform.getAttribute("lon"));
-                point_longs.push(lon);
-            }
-            var coords = [];
-            for(var m = 0; m < point_lats.length; m++){
-                coords.push([point_lats[m], point_longs[m]]);
-            }
-            // TODO map.setView() after getBounds() or
-            // TODO from coordinates with max/min
-            // actually display the route
-            var polyline = L.polyline(coords, {color: 'red'}).addTo(mymap);
+                // TODO prima statie verde, ultima rosie
+                // get platform names and coordinates and display them
+                for(p = 0; p < plat_refs.length; p++){
+                    selector = '[id="' + plat_refs[p].toString() + '"]';
+                    platform = xmlDoc.querySelectorAll(selector)[0];
+                    lat = parseFloat(platform.getAttribute("lat"));
+                    lats.push(lat);
+                    lon = parseFloat(platform.getAttribute("lon"));
+                    longs.push(lon);
+                    var name = platform.querySelectorAll('[k="name"]')[0].getAttribute("v");
+                    names.push(name);
+                    // display platforms
+                    var circle = L.circle([lat, lon], {
+                        color: 'blue',
+                        fillColor: '#0000FF',
+                        fillOpacity: 0.5,
+                        radius: 15*Math.max(1.5, Math.sqrt(stops_times[p]))
+                    }).addTo(mymap)
+                        .bindPopup(name);
+                }
 
-            // TODO prima statie verde, ultima rosie
-            // get platform names and coordinates and display them
-            for(p = 0; p < plat_refs.length; p++){
-                selector = '[id="' + plat_refs[p].toString() + '"]';
-                platform = xmlDoc.querySelectorAll(selector)[0];
-                lat = parseFloat(platform.getAttribute("lat"));
-                lats.push(lat);
-                lon = parseFloat(platform.getAttribute("lon"));
-                longs.push(lon);
-                var name = platform.querySelectorAll('[k="name"]')[0].getAttribute("v");
-                names.push(name);
-                // display platforms
-                var circle = L.circle([lat, lon], {
-                    color: 'blue',
-                    fillColor: '#0000FF',
-                    fillOpacity: 0.5,
-                    radius: 15*Math.max(1.5, Math.sqrt(stops_times[p]))
-                }).addTo(mymap)
-                  .bindPopup(name);
-            }
-
-            // get stop_positions
-            var relations = xmlDoc.getElementsByTagName("relation");
-            console.log(names.length, " stații descărcate de pe OSM.");
+                // get stop_positions
+                var relations = xmlDoc.getElementsByTagName("relation");
+                console.log(names.length, " stații descărcate de pe OSM.");
 
             } // end main if
         }; // end onreadystatechange function definition
