@@ -124,6 +124,7 @@ function readTimerFile(e) {
         var label_positions = [];
         var stops_names = [];
         var stops_lengths = [];
+        var new_stops_length = [];
         var total_distance = 0;
 
         var plat_refs = [];
@@ -357,6 +358,13 @@ function readTimerFile(e) {
                         }
                     }
                 }
+                console.log('Nr. interstatii: ', segments.length);
+                for(var i = 0; i< segments.length; i++){
+                    new_stops_length.push(segment_length(segments[i], xmlDoc));
+                }
+                console.log(new_stops_length);
+
+
                 var coords = [];
                 for(var m = 0; m < point_lats.length; m++){
                     coords.push([point_lats[m], point_longs[m]]);
