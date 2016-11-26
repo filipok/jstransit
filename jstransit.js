@@ -49,16 +49,16 @@ function add_data_cell(text) {
 }
 
 function get_coords(ref, xmlDoc){
-    selector = '[id="' + ref + '"]';
-    node = xmlDoc.querySelectorAll(selector)[0];
-    lat = parseFloat(node.getAttribute("lat"));
-    lon = parseFloat(node.getAttribute("lon"));
+    var selector = '[id="' + ref + '"]';
+    var node = xmlDoc.querySelectorAll(selector)[0];
+    var lat = parseFloat(node.getAttribute("lat"));
+    var lon = parseFloat(node.getAttribute("lon"));
     return [lat, lon];
 }
 
 Number.prototype.toRad = function() {
    return this * Math.PI / 180;
-}
+};
 
 function two_point_length(lat1, lon1, lat2, lon2){
 	// http://stackoverflow.com/questions/14560999/using-the-haversine-formula-in-javascript
@@ -76,7 +76,7 @@ function two_point_length(lat1, lon1, lat2, lon2){
 }
 
 function segment_length(segm_array, xmlDoc){
-	s_length = 0;
+	var s_length = 0;
 	var start_p = [];
 	var end_p = [];
 	for(var k = 0; k < segm_array.length - 1; k++){
