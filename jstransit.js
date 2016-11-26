@@ -52,6 +52,13 @@ function euclidean_distance(x, y, a, b){
     return Math.sqrt(Math.pow(a-x, 2) + Math.pow(b-y, 2));
 }
 
+function get_coords(ref, xmlDoc){
+    selector = '[id="' + ref + '"]';
+    node = xmlDoc.querySelectorAll(selector)[0];
+    lat = parseFloat(node.getAttribute("lat"));
+    lon = parseFloat(node.getAttribute("lon"));
+    return [lat, lon];
+}
 function readRouteFile(e) {
     var file = e.target.files[0];
     if (!file) {
