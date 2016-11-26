@@ -338,22 +338,17 @@ function readTimerFile(e) {
                 var started = false;
                 var counter =  0;
                 var temp_segment = [];
-                console.log(waypoint_refs);
-                console.log(stop_refs);
                 for(p = 0; p < waypoint_refs.length; p++){
                     // create lat and long arrays for the route
                     var temp_coords = get_coords(waypoint_refs[p], xmlDoc);
                     point_lats.push(temp_coords[0]);
                     point_longs.push(temp_coords[1]);
                     // try to separate segments between stops
-                    console.log(waypoint_refs[p]);
-                    console.log(stop_refs[counter]);
                     if(waypoint_refs[p] === stop_refs[counter]){
                         counter ++;
                         if(started){
                             right = p;
                             temp_segment = waypoint_refs.slice(left, right +1);
-                            console.log(temp_segment);
                             segments.push(temp_segment);
                             left = p; // starting new segment
                         } else {
@@ -362,7 +357,6 @@ function readTimerFile(e) {
                         }
                     }
                 }
-                console.log(segments);
                 var coords = [];
                 for(var m = 0; m < point_lats.length; m++){
                     coords.push([point_lats[m], point_longs[m]]);
