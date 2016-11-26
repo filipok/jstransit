@@ -99,6 +99,104 @@ function readRouteFile(e) {
     reader.readAsText(file);
 }
 
+
+function createBarchart(laps, durations, adj_ctx, stops_lengths, total_distance, stops_times){
+
+    var interstation_moves = [];
+    var label_positions = [];
+    var stops_names = [];
+    var interstation_stops = [];
+
+    // get total duration of laps
+    var total_duration = 0;
+    for(lap = 0; lap < laps.length; lap++){
+        duration = get_seconds(durations[lap]);
+        total_duration += duration;
+    }
+
+    // create chart
+    var current = barstart_x;
+    for(lap = 0; lap < laps.length; lap++){
+        str = laps[lap];
+        str = str.substring(0, str.length -1);
+        var abs_duration = get_seconds(durations[lap]);
+        duration = Math.round(abs_duration * (adj_ctx.canvas.width - 20) / total_duration);
+
+        switch (str.substring(0, 1)){
+            case '*':
+                addSegment(adj_ctx, duration, 'red', current, barstart_y, barwidth);
+                current += duration;
+                interstation_stops[interstation_stops.length - 1] += abs_duration;
+                break;
+            case '@':
+                stops_names.push(str.substring(1));
+                label_positions.push(current);
+                addSegment(adj_ctx, duration, 'aqua', current, barstart_y, 2*barwidth);
+                current += duration;
+                interstation_moves.push(0);
+                interstation_stops.push(0);
+                stops_times.push(abs_duration);
+                break;
+            case '+':
+                addSegment(adj_ctx, duration, 'green', current, barstart_y, barwidth);
+                current += duration;
+                interstation_moves[interstation_moves.length - 1] += abs_duration;
+                break;
+            default:
+                addSegment(adj_ctx, duration, 'black', current, barstart_y, 2*barwidth);
+                current += duration;
+        }
+    }
+
+    console.log(stops_times.length, " stații cronometrate.");
+
+    var data_table = document.createElement("DIV");
+    data_table.className = "datatable";
+    // header row
+    var header_row = document.createElement("DIV");
+    header_row.className = "headerrow";
+    header_row.appendChild(add_data_cell("De la"));
+    header_row.appendChild(add_data_cell("La"));
+    header_row.appendChild(add_data_cell("Distanță (km)"));
+    header_row.appendChild(add_data_cell("Total (s)"));
+    header_row.appendChild(add_data_cell("D/c stație (s)"));
+    header_row.appendChild(add_data_cell("V (km/h)"));
+    header_row.appendChild(add_data_cell("Pondere (%)"));
+    data_table.appendChild(header_row);
+
+    var stop;
+    for (stop = 0; stop < stops_names.length; stop++){
+        addLabel(adj_ctx, stops_names[stop], label_positions[stop]);
+    }
+    for (stop = 0; stop < stops_names.length - 1; stop++){
+        var data_row = document.createElement("DIV");
+        data_row.className = "datarow";
+        data_row.appendChild(add_data_cell(stops_names[stop]));
+        data_row.appendChild(add_data_cell(stops_names[stop+1]));
+        data_row.appendChild(add_data_cell(stops_lengths[stop]));
+        var total_interstation = interstation_moves[stop] +interstation_stops[stop] + stops_times[stop];
+        data_row.appendChild(add_data_cell(total_interstation));
+        data_row.appendChild(add_data_cell(stops_times[stop]));
+        var speed = Math.round((stops_lengths[stop]/(total_interstation-stops_times[stop]))*3600*10)/10;
+        data_row.appendChild(add_data_cell(speed));
+        var green = Math.min(Math.round(2*255*speed/max_speed), 255);
+        var red = Math.min(Math.max(0,Math.round(2*255*(1-speed/max_speed))), 255);
+        data_row.style.backgroundColor = "rgb(" + red +"," + green + ",0)";
+        var perc = Math.round((total_interstation*100/total_duration)*10)/10;
+        data_row.appendChild(add_data_cell(perc));
+        data_table.appendChild(data_row);
+    }
+    var rezumat = '';
+    rezumat += 'Timp total: ' + convert_from_seconds(total_duration) + '.\n';
+    rezumat += 'Distanță totală: ' + Math.round(total_distance*10)/10 + ' km.\n';
+    rezumat += 'Viteză medie: ' + Math.round((total_distance/total_duration)*3600*10)/10 + ' km/h.\n';
+    displayContents(rezumat);
+
+    document.getElementsByTagName('body')[0].insertBefore(data_table, document.getElementById('mapid'));
+
+}
+
+
 function readTimerFile(e) {
     var file = e.target.files[0];
     if (!file) {
@@ -117,12 +215,12 @@ function readTimerFile(e) {
 
         var durations = [];
         var laps = [];
-        var interstation_moves = [];
-        var interstation_stops = [];
+
+
         var stops_times = [];
         var total_duration = 0;
-        var label_positions = [];
-        var stops_names = [];
+
+
         var stops_lengths = [];
         var new_stops_length = [];
         var total_distance = 0;
@@ -163,89 +261,10 @@ function readTimerFile(e) {
                 laps.push(str);
             }
         }
-        // get total duration of laps
-        for(lap = 0; lap < laps.length; lap++){
-            duration = get_seconds(durations[lap]);
-            total_duration += duration;
-        }
-        // create chart
-        var current = barstart_x;
-        for(lap = 0; lap < laps.length; lap++){
-            str = laps[lap];
-            str = str.substring(0, str.length -1);
-            var abs_duration = get_seconds(durations[lap]);
-            duration = Math.round(abs_duration * (adj_ctx.canvas.width - 20) / total_duration);
 
-            switch (str.substring(0, 1)){
-                case '*':
-                    addSegment(adj_ctx, duration, 'red', current, barstart_y, barwidth);
-                    current += duration;
-                    interstation_stops[interstation_stops.length - 1] += abs_duration;
-                    break;
-                case '@':
-                    stops_names.push(str.substring(1));
-                    label_positions.push(current);
-                    addSegment(adj_ctx, duration, 'aqua', current, barstart_y, 2*barwidth);
-                    current += duration;
-                    interstation_moves.push(0);
-                    interstation_stops.push(0);
-                    stops_times.push(abs_duration);
-                    break;
-                case '+':
-                    addSegment(adj_ctx, duration, 'green', current, barstart_y, barwidth);
-                    current += duration;
-                    interstation_moves[interstation_moves.length - 1] += abs_duration;
-                    break;
-                default:
-                    addSegment(adj_ctx, duration, 'black', current, barstart_y, 2*barwidth);
-                    current += duration;
-            }
-        }
-        console.log(stops_times.length, " stații cronometrate.");
-        // Add stop labels and display output data
-        var data_table = document.createElement("DIV");
-        data_table.className = "datatable";
-        // header row
-        var header_row = document.createElement("DIV");
-        header_row.className = "headerrow";
-        header_row.appendChild(add_data_cell("De la"));
-        header_row.appendChild(add_data_cell("La"));
-        header_row.appendChild(add_data_cell("Distanță (km)"));
-        header_row.appendChild(add_data_cell("Total (s)"));
-        header_row.appendChild(add_data_cell("D/c stație (s)"));
-        header_row.appendChild(add_data_cell("V (km/h)"));
-        header_row.appendChild(add_data_cell("Pondere (%)"));
-        data_table.appendChild(header_row);
-
-        var stop;
-        for (stop = 0; stop < stops_names.length; stop++){
-            addLabel(adj_ctx, stops_names[stop], label_positions[stop]);
-        }
-        for (stop = 0; stop < stops_names.length - 1; stop++){
-            var data_row = document.createElement("DIV");
-            data_row.className = "datarow";
-            data_row.appendChild(add_data_cell(stops_names[stop]));
-            data_row.appendChild(add_data_cell(stops_names[stop+1]));
-            data_row.appendChild(add_data_cell(stops_lengths[stop]));
-            var total_interstation = interstation_moves[stop] +interstation_stops[stop] + stops_times[stop];
-            data_row.appendChild(add_data_cell(total_interstation));
-            data_row.appendChild(add_data_cell(stops_times[stop]));
-            var speed = Math.round((stops_lengths[stop]/(total_interstation-stops_times[stop]))*3600*10)/10;
-            data_row.appendChild(add_data_cell(speed));
-            var green = Math.min(Math.round(2*255*speed/max_speed), 255);
-            var red = Math.min(Math.max(0,Math.round(2*255*(1-speed/max_speed))), 255);
-            data_row.style.backgroundColor = "rgb(" + red +"," + green + ",0)";
-            var perc = Math.round((total_interstation*100/total_duration)*10)/10;
-            data_row.appendChild(add_data_cell(perc));
-            data_table.appendChild(data_row);
-        }
-        var rezumat = '';
-        rezumat += 'Timp total: ' + convert_from_seconds(total_duration) + '.\n';
-        rezumat += 'Distanță totală: ' + Math.round(total_distance*10)/10 + ' km.\n';
-        rezumat += 'Viteză medie: ' + Math.round((total_distance/total_duration)*3600*10)/10 + ' km/h.\n';
-        displayContents(rezumat);
-
-        document.getElementsByTagName('body')[0].insertBefore(data_table, document.getElementById('mapid'));
+        
+        createBarchart(laps, durations, adj_ctx, stops_lengths, total_distance, stops_times);
+        
 
         // read chosen route
         var r = document.getElementById("route");
