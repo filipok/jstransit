@@ -99,6 +99,7 @@ function readTimerFile(e) {
         var total_distance = 0;
 
         var plat_refs = [];
+        var stop_refs = [];
         var way_refs = [];
         var waypoint_refs = [];
         var lats =[];
@@ -106,6 +107,8 @@ function readTimerFile(e) {
         var names = [];
         var point_lats = [];
         var point_longs = [];
+
+        var segments = [];
 
 
 
@@ -238,11 +241,15 @@ function readTimerFile(e) {
                 // extract relation element
                 var relation = xmlDoc.getElementsByTagName("relation")[0];
 
-                // get platform refs
+                // get platform refs and stop position refs
                 var p, selector, platform, lat, lon;
                 var platforms = relation.querySelectorAll('[role="platform"]');
                 for(p = 0; p < platforms.length; p++){
                     plat_refs.push(platforms[p].getAttribute("ref"));
+                }
+                var stop_positions = relation.querySelectorAll('[role="stop"]');
+                for(p = 0; p < stop_positions.length; p++){
+                    stop_refs.push(stop_positions[p].getAttribute("ref"));
                 }
 
 
@@ -298,14 +305,36 @@ function readTimerFile(e) {
 
                 }
                 // create lat and long arrays for the route
+                var left = 0;
+                var right = 0;
+                var started = false;
+                var counter =  0;
+                var temp_segment = [];
+                console.log(waypoint_refs);
+                console.log(stop_refs);
                 for(p = 0; p < waypoint_refs.length; p++){
-                    selector = '[id="' + waypoint_refs[p] + '"]';
-                    platform = xmlDoc.querySelectorAll(selector)[0];
-                    lat = parseFloat(platform.getAttribute("lat"));
-                    point_lats.push(lat);
-                    lon = parseFloat(platform.getAttribute("lon"));
-                    point_longs.push(lon);
+                    // create lat and long arrays for the route
+                    var temp_coords = get_coords(waypoint_refs[p], xmlDoc);
+                    point_lats.push(temp_coords[0]);
+                    point_longs.push(temp_coords[1]);
+                    // try to separate segments between stops
+                    console.log(waypoint_refs[p]);
+                    console.log(stop_refs[counter]);
+                    if(waypoint_refs[p] === stop_refs[counter]){
+                        counter ++;
+                        if(started){
+                            right = p;
+                            temp_segment = waypoint_refs.slice(left, right +1);
+                            console.log(temp_segment);
+                            segments.push(temp_segment);
+                            left = p; // starting new segment
+                        } else {
+                            left = p;
+                            started = true;
+                        }
+                    }
                 }
+                console.log(segments);
                 var coords = [];
                 for(var m = 0; m < point_lats.length; m++){
                     coords.push([point_lats[m], point_longs[m]]);
@@ -336,8 +365,6 @@ function readTimerFile(e) {
                         .bindPopup(name);
                 }
 
-                // get stop_positions
-                var relations = xmlDoc.getElementsByTagName("relation");
                 console.log(names.length, " stații descărcate de pe OSM.");
 
             } // end main if
