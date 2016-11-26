@@ -55,7 +55,7 @@ function euclidean_distance(x, y, a, b){
 function readRouteFile(e) {
     var file = e.target.files[0];
     if (!file) {
-        return
+        return;
     }
     var reader = new FileReader();
     reader.onload = function (e) {
@@ -67,7 +67,7 @@ function readRouteFile(e) {
 function readTimerFile(e) {
     var file = e.target.files[0];
     if (!file) {
-        return
+        return;
     }
     var reader = new FileReader();
     reader.onload = function (e) {
