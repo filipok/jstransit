@@ -48,10 +48,6 @@ function add_data_cell(text) {
     return data_cell;
 }
 
-function euclidean_distance(x, y, a, b){
-    return Math.sqrt(Math.pow(a-x, 2) + Math.pow(b-y, 2));
-}
-
 function get_coords(ref, xmlDoc){
     selector = '[id="' + ref + '"]';
     node = xmlDoc.querySelectorAll(selector)[0];
@@ -59,6 +55,38 @@ function get_coords(ref, xmlDoc){
     lon = parseFloat(node.getAttribute("lon"));
     return [lat, lon];
 }
+
+Number.prototype.toRad = function() {
+   return this * Math.PI / 180;
+}
+
+function two_point_length(lat1, lon1, lat2, lon2){
+	// http://stackoverflow.com/questions/14560999/using-the-haversine-formula-in-javascript
+	var R = 6371; // km
+	//has a problem with the .toRad() method below.
+	var x1 = lat2-lat1;
+	var dLat = x1.toRad();
+	var x2 = lon2-lon1;
+	var dLon = x2.toRad();
+	var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+	                Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) *
+	                Math.sin(dLon/2) * Math.sin(dLon/2);
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	return R * c;
+}
+
+function segment_length(segm_array, xmlDoc){
+	s_length = 0;
+	var start_p = [];
+	var end_p = [];
+	for(var k = 0; k < segm_array.length - 1; k++){
+		start_p = get_coords(segm_array[k], xmlDoc);
+		end_p = get_coords(segm_array[k+1], xmlDoc);
+		s_length += two_point_length(start_p[0], start_p[1], end_p[0], end_p[1]);
+	}
+	return s_length;
+}
+
 function readRouteFile(e) {
     var file = e.target.files[0];
     if (!file) {
