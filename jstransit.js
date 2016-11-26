@@ -2,7 +2,6 @@ var barwidth = 80;
 var barstart_x = 10;
 var barstart_y = 10;
 var text_width = 9;
-var date_traseu = '';
 var max_speed = 40; //km/h
 
 function get_seconds(timestring){
@@ -56,6 +55,28 @@ function get_coords(ref, xmlDoc){
     return [lat, lon];
 }
 
+function process_timing(contents){
+    // create arrays of lap names and durations
+    //TODO hardcoded?
+    var lines = contents.split('\n');
+    var str;
+    var durations = [];
+    var laps = [];
+    for(var line = lines.length ; line > 0; line--){
+        str = lines[line-1];
+        if (str.startsWith('Lap Time')){
+            str = str.split(': ')[1];
+            durations.push(str);
+        }
+        if (str.startsWith('Lap Description')){
+            str = str.split(': ')[1];
+            laps.push(str);
+        }
+    }
+    return [durations, laps];
+}
+
+
 Number.prototype.toRad = function() {
    return this * Math.PI / 180;
 };
@@ -87,25 +108,13 @@ function segment_length(segm_array, xmlDoc){
 	return s_length;
 }
 
-function readRouteFile(e) {
-    var file = e.target.files[0];
-    if (!file) {
-        return;
-    }
-    var reader = new FileReader();
-    reader.onload = function (e) {
-        date_traseu = e.target.result;
-    };
-    reader.readAsText(file);
-}
-
-
 function createBarchart(laps, durations, adj_ctx, stops_lengths, total_distance, stops_times){
 
     var interstation_moves = [];
     var label_positions = [];
     var stops_names = [];
     var interstation_stops = [];
+    var duration, lap, str;
 
     // get total duration of laps
     var total_duration = 0;
@@ -173,7 +182,7 @@ function createBarchart(laps, durations, adj_ctx, stops_lengths, total_distance,
         data_row.className = "datarow";
         data_row.appendChild(add_data_cell(stops_names[stop]));
         data_row.appendChild(add_data_cell(stops_names[stop+1]));
-        data_row.appendChild(add_data_cell(stops_lengths[stop]));
+        data_row.appendChild(add_data_cell(stops_lengths[stop].toFixed(3)));
         var total_interstation = interstation_moves[stop] +interstation_stops[stop] + stops_times[stop];
         data_row.appendChild(add_data_cell(total_interstation));
         data_row.appendChild(add_data_cell(stops_times[stop]));
@@ -205,7 +214,6 @@ function readTimerFile(e) {
     var reader = new FileReader();
     reader.onload = function (e) {
         var contents = e.target.result;
-        var lines = contents.split('\n');
 
         var adj_c = document.getElementById("adjCanvas");
         var adj_ctx = adj_c.getContext("2d");
@@ -213,18 +221,9 @@ function readTimerFile(e) {
         adj_ctx.clearRect(0, 0, adj_ctx.canvas.width, adj_ctx.canvas.height);
         adj_ctx.font = "10px Arial";
 
-        var durations = [];
-        var laps = [];
-
-
         var stops_times = [];
-        var total_duration = 0;
-
-
-        var stops_lengths = [];
         var new_stops_length = [];
         var total_distance = 0;
-
         var plat_refs = [];
         var stop_refs = [];
         var way_refs = [];
@@ -234,37 +233,11 @@ function readTimerFile(e) {
         var names = [];
         var point_lats = [];
         var point_longs = [];
-
         var segments = [];
 
-
-
-
-        // process date_traseu
-        var traseu_stops = date_traseu.split('\n');
-        for (var k = 1; k < traseu_stops.length; k++){
-            var temp = parseFloat(traseu_stops[k].split('\t')[1]);
-            stops_lengths.push(temp);
-            total_distance += temp;
-        }
-
-        // create arrays of lap names and durations
-        var str, duration, lap;
-        for(var line = lines.length ; line > 0; line--){
-            str = lines[line-1];
-            if (str.startsWith('Lap Time')){
-                str = str.split(': ')[1];
-                durations.push(str);
-            }
-            if (str.startsWith('Lap Description')){
-                str = str.split(': ')[1];
-                laps.push(str);
-            }
-        }
-
-        
-        createBarchart(laps, durations, adj_ctx, stops_lengths, total_distance, stops_times);
-        
+        var res = process_timing(contents); //get timings
+        var durations = res[0];
+        var laps = res[1];
 
         // read chosen route
         var r = document.getElementById("route");
@@ -378,8 +351,11 @@ function readTimerFile(e) {
                     }
                 }
                 console.log('Nr. interstatii: ', segments.length);
+                var segm;
                 for(var i = 0; i< segments.length; i++){
-                    new_stops_length.push(segment_length(segments[i], xmlDoc));
+                    segm = segment_length(segments[i], xmlDoc);
+                    new_stops_length.push(segm);
+                    total_distance += segm;
                 }
                 console.log(new_stops_length);
 
@@ -392,6 +368,9 @@ function readTimerFile(e) {
                 // TODO from coordinates with max/min
                 // actually display the route
                 var polyline = L.polyline(coords, {color: 'red'}).addTo(mymap);
+
+                createBarchart(laps, durations, adj_ctx, new_stops_length, total_distance,
+                    stops_times);
 
                 // TODO prima statie verde, ultima rosie
                 // get platform names and coordinates and display them
@@ -416,6 +395,7 @@ function readTimerFile(e) {
 
                 console.log(names.length, " stații descărcate de pe OSM.");
 
+
             } // end main if
         }; // end onreadystatechange function definition
         xhttp.open("GET", overpass_full, true);
@@ -424,4 +404,3 @@ function readTimerFile(e) {
     reader.readAsText(file);
 }
 document.getElementById('timer-file-input').addEventListener('change', readTimerFile, false);
-document.getElementById('route-file-input').addEventListener('change', readRouteFile, false);
