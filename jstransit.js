@@ -70,6 +70,29 @@ function get_array_coords(array, xmlDoc){
     return res;
 }
 
+function display_platforms(names, lats, longs, mymap){
+    // display platforms
+    for(p = 0; p < names.length; p++){
+        var plat_color = 'blue';
+        var plat_fillColor = '#0000FF';
+        if (p === 0) {
+            plat_color = 'green';
+            plat_fillColor = 'green';
+        }
+        if (p === names.length -1) {
+            plat_color = 'red';
+            plat_fillColor = 'red';
+        }
+        L.circle([lats[p], longs[p]], {
+            color: plat_color,
+            fillColor: plat_fillColor,
+            fillOpacity: 0.5,
+            radius: 15*Math.max(1.5, Math.sqrt(stops_times[p]))
+        }).addTo(mymap)
+            .bindPopup(names[p]);
+    }
+}
+
 function process_timing(timing){
     // create arrays of lap names and durations
     //TODO hardcoded?
@@ -386,25 +409,8 @@ function makeMap(timing, that){
         longs.push(lon);
         var name = platform.querySelectorAll('[k="name"]')[0].getAttribute("v");
         names.push(name);
-        var plat_color = 'blue';
-        var plat_fillColor = '#0000FF';
-        if (p === 0) {
-            plat_color = 'green';
-            plat_fillColor = 'green';
-        }
-        if (p === plat_refs.length -1) {
-            plat_color = 'red';
-            plat_fillColor = 'red';
-        }
-        // display platforms
-        L.circle([lat, lon], {
-            color: plat_color,
-            fillColor: plat_fillColor,
-            fillOpacity: 0.5,
-            radius: 15*Math.max(1.5, Math.sqrt(stops_times[p]))
-        }).addTo(mymap)
-            .bindPopup(name);
     }
+    display_platforms(names, lats, longs, mymap);
 
     console.log(names.length, " stații descărcate de pe OSM.");
 }
