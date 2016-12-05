@@ -70,7 +70,7 @@ function get_array_coords(array, xmlDoc){
     return res;
 }
 
-function display_platforms(names, lats, longs, mymap){
+function display_platforms(names, coords, mymap){
     // display platforms
     for(p = 0; p < names.length; p++){
         var plat_color = 'blue';
@@ -83,7 +83,7 @@ function display_platforms(names, lats, longs, mymap){
             plat_color = 'red';
             plat_fillColor = 'red';
         }
-        L.circle([lats[p], longs[p]], {
+        L.circle([coords[p][0], coords[p][1]], {
             color: plat_color,
             fillColor: plat_fillColor,
             fillOpacity: 0.5,
@@ -340,7 +340,7 @@ function makeMap(timing, that){
     var relation = xmlDoc.getElementsByTagName("relation")[0];
 
     // get platform refs and stop position refs
-    var p, selector, platform, lat, lon;
+    var p, selector, platform;
     var platforms = relation.querySelectorAll('[role="platform"]');
     for(p = 0; p < platforms.length; p++){
         plat_refs.push(platforms[p].getAttribute("ref"));
@@ -359,6 +359,7 @@ function makeMap(timing, that){
     var started = false;
     var counter =  0;
     var coords = [];
+    var p_coords = [];
     for(p = 0; p < waypoint_refs.length; p++){
         // create lat and long arrays for the route
         coords.push(get_coords(waypoint_refs[p], xmlDoc));
@@ -399,18 +400,15 @@ function makeMap(timing, that){
         L.polyline(get_array_coords(segments[i], xmlDoc), {color: segment_colors[i], weight: 3}).addTo(mymap);
     }
 
-    // get platform names and coordinates and display them
+    // get platform names and coordinates
     for(p = 0; p < plat_refs.length; p++){
+        p_coords.push(get_coords(plat_refs[p], xmlDoc));
         selector = '[id="' + plat_refs[p].toString() + '"]';
         platform = xmlDoc.querySelectorAll(selector)[0];
-        lat = parseFloat(platform.getAttribute("lat"));
-        lats.push(lat);
-        lon = parseFloat(platform.getAttribute("lon"));
-        longs.push(lon);
-        var name = platform.querySelectorAll('[k="name"]')[0].getAttribute("v");
-        names.push(name);
+        names.push(platform.querySelectorAll('[k="name"]')[0].getAttribute("v"));
     }
-    display_platforms(names, lats, longs, mymap);
+
+    display_platforms(names, p_coords, mymap); // TODO use coords
 
     console.log(names.length, " stații descărcate de pe OSM.");
 }
