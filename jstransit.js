@@ -216,10 +216,9 @@ function join_ways(relation, xmlDoc){
     return waypoint_refs;
 }
 
-function createBarchart(laps, durations, total_duration, adj_ctx){
+function createBarchart(laps, durations, total_duration, names, adj_ctx){
     // TODO hardcoded?
     var current = barstart_x;
-    var stops_names = []; // TODO de scos din OSM!!
     var label_positions = [];
     var interstation_moves = [];
     var interstation_stops = [];
@@ -237,7 +236,6 @@ function createBarchart(laps, durations, total_duration, adj_ctx){
                 interstation_stops[interstation_stops.length - 1] += abs_duration;
                 break;
             case '@':
-                stops_names.push(str.substring(1));
                 label_positions.push(current);
                 addSegment(adj_ctx, duration, 'aqua', current, barstart_y, 2*barwidth);
                 current += duration;
@@ -256,13 +254,14 @@ function createBarchart(laps, durations, total_duration, adj_ctx){
         }
     }
     var stop;
-    for (stop = 0; stop < stops_names.length; stop++){
-        addLabel(adj_ctx, stops_names[stop], label_positions[stop]);
+    for (stop = 0; stop < names.length; stop++){
+        addLabel(adj_ctx, names[stop], label_positions[stop]);
     }
-    return [stops_names, interstation_moves, interstation_stops, stops_times];
+    return [interstation_moves, interstation_stops, stops_times];
 }
 
-function createChart(timing, stops_lengths, total_distance){
+
+function createChart(timing, stops_lengths, total_distance, names){
 
     var adj_c = document.getElementById("adjCanvas");
     var adj_ctx = adj_c.getContext("2d");
@@ -285,11 +284,10 @@ function createChart(timing, stops_lengths, total_distance){
     }
 
     // create chart
-    var result = createBarchart(laps, durations, total_duration, adj_ctx);
-    var stops_names = result[0];
-    var interstation_moves = result[1];
-    var interstation_stops = result[2];
-    var stops_times = result[3];
+    var result = createBarchart(laps, durations, total_duration, names, adj_ctx);
+    var interstation_moves = result[0];
+    var interstation_stops = result[1];
+    var stops_times = result[2];
     var segment_colors = [];
 
     console.log(stops_times.length, " stații cronometrate."); // stops_times cam global
@@ -306,7 +304,7 @@ function createChart(timing, stops_lengths, total_distance){
     data_table.appendChild(header_row);
 
 
-    for (var stop = 0; stop < stops_names.length - 1; stop++){
+    for (var stop = 0; stop < names.length - 1; stop++){
         var data_row = document.createElement("DIV");
         data_row.className = "datarow";
         var total_interstation = interstation_moves[stop] +interstation_stops[stop] + stops_times[stop];
@@ -314,7 +312,7 @@ function createChart(timing, stops_lengths, total_distance){
         var green = Math.min(Math.round(2*255*speed/max_speed), 255);
         var red = Math.min(Math.max(0,Math.round(2*255*(1-speed/max_speed))), 255);
         var perc = Math.round((total_interstation*100/total_duration)*10)/10;
-        var row_text = [stops_names[stop], stops_names[stop+1], stops_lengths[stop].toFixed(3), total_interstation,
+        var row_text = [names[stop], names[stop+1], stops_lengths[stop].toFixed(3), total_interstation,
         stops_times[stop], speed, perc];
         add_row(row_text, data_row);
         segment_colors.push("rgb(" + red +"," + green + ",0)");
@@ -386,16 +384,6 @@ function makeMap(timing, xmlDoc){
     }
     console.log(new_stops_length);
 
-    // create chart and return stop times used to display stops
-    // TODO separate loops to extract  and display data
-    var res = createChart(timing, new_stops_length, total_distance);
-    stops_times = res[0];
-    segment_colors = res[1];
-
-    for(i=0; i<segments.length; i++){
-        L.polyline(get_array_coords(segments[i], xmlDoc), {color: segment_colors[i], weight: 3}).addTo(mymap);
-    }
-
     // get platform names and coordinates
     for(p = 0; p < plat_refs.length; p++){
         p_coords.push(get_coords(plat_refs[p], xmlDoc));
@@ -403,6 +391,18 @@ function makeMap(timing, xmlDoc){
         platform = xmlDoc.querySelectorAll(selector)[0];
         names.push(platform.querySelectorAll('[k="name"]')[0].getAttribute("v"));
     }
+
+    // create chart and return stop times used to display stops
+    // TODO separate loops to extract  and display data
+    var res = createChart(timing, new_stops_length, total_distance, names);
+    stops_times = res[0];
+    segment_colors = res[1];
+
+    for(i=0; i<segments.length; i++){
+        L.polyline(get_array_coords(segments[i], xmlDoc), {color: segment_colors[i], weight: 3}).addTo(mymap);
+    }
+
+
 
     var markers = display_platforms(names, p_coords, mymap); // markers to fit bounds
     var group = new L.featureGroup(markers);
