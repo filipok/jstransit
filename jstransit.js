@@ -260,7 +260,6 @@ function createBarchart(laps, durations, total_duration, names, adj_ctx){
     return [interstation_moves, interstation_stops, stops_times];
 }
 
-
 function createChart(timing, stops_lengths, total_distance, names){
 
     var adj_c = document.getElementById("adjCanvas");
