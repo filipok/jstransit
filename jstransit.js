@@ -82,6 +82,8 @@ function get_array_coords(array, xmlDoc){
 
 function display_platforms(names, coords, mymap){
     // display platforms
+    var markers = [];
+    var circle;
     for(p = 0; p < names.length; p++){
         var plat_color = 'blue';
         var plat_fillColor = '#0000FF';
@@ -93,14 +95,16 @@ function display_platforms(names, coords, mymap){
             plat_color = 'red';
             plat_fillColor = 'red';
         }
-        L.circle([coords[p][0], coords[p][1]], {
+        circle = L.circle([coords[p][0], coords[p][1]], {
             color: plat_color,
             fillColor: plat_fillColor,
             fillOpacity: 0.5,
             radius: 15*Math.max(1.5, Math.sqrt(stops_times[p]))
         }).addTo(mymap)
             .bindPopup(names[p]);
+    markers.push(circle);
     }
+    return markers;
 }
 
 function process_timing(timing){
@@ -352,15 +356,15 @@ function makeMap(timing, that){
     var waypoint_refs = join_ways(relation, xmlDoc);
 
     // create lat and long arrays for the route
+
+    var p_coords = [];
+
     var left = 0;
     var right = 0;
     var started = false;
     var counter =  0;
-    var coords = [];
-    var p_coords = [];
+
     for(p = 0; p < waypoint_refs.length; p++){
-        // create lat and long arrays for the route
-        coords.push(get_coords(waypoint_refs[p], xmlDoc));
         // try to separate segments between stops
         if(waypoint_refs[p] === stop_refs[counter]){
             counter ++;
@@ -389,11 +393,6 @@ function makeMap(timing, that){
     stops_times = res[0];
     segment_colors = res[1];
 
-    //create route polyline
-    var polyline = L.polyline(coords, {color: 'red'}).addTo(mymap);
-    mymap.fitBounds(polyline.getBounds());
-    mymap.removeLayer(polyline);
-
     for(i=0; i<segments.length; i++){
         L.polyline(get_array_coords(segments[i], xmlDoc), {color: segment_colors[i], weight: 3}).addTo(mymap);
     }
@@ -406,7 +405,10 @@ function makeMap(timing, that){
         names.push(platform.querySelectorAll('[k="name"]')[0].getAttribute("v"));
     }
 
-    display_platforms(names, p_coords, mymap); // TODO use coords
+    var markers = display_platforms(names, p_coords, mymap); // markers to fit bounds
+    var group = new L.featureGroup(markers);
+    mymap.fitBounds(group.getBounds());
+
 
     console.log(names.length, " stații descărcate de pe OSM.");
 }
