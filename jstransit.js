@@ -331,8 +331,6 @@ function createChart(timing, stops_lengths, total_distance, names){
 
 function makeMap(timing, xmlDoc){
     var names = [];
-    var point_lats = [];
-    var point_longs = [];
     var segments = [];
     var new_stops_length = [];
     var total_distance = 0;
@@ -396,17 +394,13 @@ function makeMap(timing, xmlDoc){
     var res = createChart(timing, new_stops_length, total_distance, names);
     stops_times = res[0];
     segment_colors = res[1];
-
     for(i=0; i<segments.length; i++){
         L.polyline(get_array_coords(segments[i], xmlDoc), {color: segment_colors[i], weight: 3}).addTo(mymap);
     }
 
-
-
-    var markers = display_platforms(names, p_coords, mymap); // markers to fit bounds
+    var markers = display_platforms(names, p_coords, mymap); // return markers to fit bounds
     var group = new L.featureGroup(markers);
     mymap.fitBounds(group.getBounds());
-
 
     console.log(names.length, " stații descărcate de pe OSM.");
 }
