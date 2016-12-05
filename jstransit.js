@@ -332,14 +332,13 @@ function createChart(timing, stops_lengths, total_distance){
 
 }
 
-function makeMap(timing, that){
+function makeMap(timing, xmlDoc){
     var names = [];
     var point_lats = [];
     var point_longs = [];
     var segments = [];
     var new_stops_length = [];
     var total_distance = 0;
-    var xmlDoc = that.responseXML;
 
     // create map
     var mymap = L.map('mapid').setView([44.40, 26.1], 13);
@@ -436,7 +435,8 @@ function readTimerFile(e) {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                makeMap(timing, this);
+                var xmlDoc = this.responseXML;
+                makeMap(timing, xmlDoc);
             }
         };
         xhttp.open("GET", overpass_full, true);
