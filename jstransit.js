@@ -173,8 +173,8 @@ function join_ways(relation, xmlDoc){
     for(p = 0; p < way_refs.length; p++){
         selector = '[id="' + way_refs[p] + '"]';
         var way = xmlDoc.querySelectorAll(selector)[0];
-        var current_points = [];
         var way_points = way.getElementsByTagName("nd");
+        var current_points = [];
         for (var w = 0; w < way_points.length; w ++){
             var ref = way_points[w].getAttribute("ref");
             current_points.push(ref);
@@ -418,19 +418,14 @@ function readTimerFile(e) {
         return;
     }
     var reader = new FileReader();
-
     reader.onload = function (e) {
         var timing = e.target.result;
-
-
         // read chosen route
         var r = document.getElementById("route");
         var routeID = r.options[r.selectedIndex].value;
-        //var routeName = r.options[r.selectedIndex].text;
         var overpass_1 = 'http://overpass-api.de/api/interpreter?data=relation(';
         var overpass_2 =');out body;>;out body;rel(bn)["public_transport"="stop_area"];out body;';
         var overpass_full = overpass_1 + routeID + overpass_2;
-
         //display map and data
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
@@ -442,7 +437,6 @@ function readTimerFile(e) {
         xhttp.open("GET", overpass_full, true);
         xhttp.send();
     };
-
     reader.readAsText(file);
 }
 document.getElementById('timer-file-input').addEventListener('change', readTimerFile, false);
