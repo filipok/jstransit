@@ -54,6 +54,16 @@ function add_row(text_arr, row){
     }
 }
 
+function get_refs(role_name, relation){
+    var ref_list = [];
+    var selector = '[role=' + role_name + ']';
+    var obj_list = relation.querySelectorAll(selector);
+    for(p = 0; p < obj_list.length; p++){
+        ref_list.push(obj_list[p].getAttribute("ref"));
+    }
+    return ref_list;
+}
+
 function get_coords(ref, xmlDoc){
     var selector = '[id="' + ref + '"]';
     var node = xmlDoc.querySelectorAll(selector)[0];
@@ -319,10 +329,6 @@ function createChart(timing, stops_lengths, total_distance){
 }
 
 function makeMap(timing, that){
-    var plat_refs = [];
-    var stop_refs = [];
-    var lats =[];
-    var longs = [];
     var names = [];
     var point_lats = [];
     var point_longs = [];
@@ -336,21 +342,13 @@ function makeMap(timing, that){
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(mymap);
+
     // extract relation element
     var relation = xmlDoc.getElementsByTagName("relation")[0];
-
     // get platform refs and stop position refs
-    var p, selector, platform;
-    var platforms = relation.querySelectorAll('[role="platform"]');
-    for(p = 0; p < platforms.length; p++){
-        plat_refs.push(platforms[p].getAttribute("ref"));
-    }
-    var stop_positions = relation.querySelectorAll('[role="stop"]');
-    for(p = 0; p < stop_positions.length; p++){
-        stop_refs.push(stop_positions[p].getAttribute("ref"));
-    }
-
-    // join ways
+    var plat_refs = get_refs('platform', relation);
+    var stop_refs = get_refs('stop', relation);
+    // join ways to create full route
     var waypoint_refs = join_ways(relation, xmlDoc);
 
     // create lat and long arrays for the route
