@@ -13,6 +13,8 @@ var red_letter = '*';
 var inter_letter = '+';
 var timer_keyword_time = 'Lap Time';
 var timer_keyword_name = 'Lap Description';
+var headers = ["De la", "La", "Distanță (km)", "Total (s)",
+        "D/c stație (s)", "V (km/h)", "Pondere (%)"];
 
 function get_seconds(timestring){
     var a = timestring.split(':');
@@ -141,7 +143,7 @@ function display_platforms(names, coords, mymap){
     return markers;
 }
 
-function processTiming(timing){
+function processTiming(timing, stops_lengths){
     var lines = timing.split('\n');
     var str;
     var durations = [];
@@ -187,7 +189,37 @@ function processTiming(timing){
                 segment_types.push(unknown_color);
         }
     }
-    return [interstation_moves, interstation_stops, stops_times, segment_types, durations];
+
+    var duration;
+    // get total duration of laps
+    var total_duration = 0;
+    for(lap = 0; lap < durations.length; lap++){
+        duration = get_seconds(durations[lap]);
+        total_duration += duration;
+    }
+
+
+    var speeds = [];
+    var greens = [];
+    var reds = [];
+    var percs = [];
+    var total_interstations = [];
+    var segment_colors = [];
+    for (var stop = 0; stop < stops_lengths.length; stop++){
+        var speed = Math.round((stops_lengths[stop]/(interstation_moves[stop] +interstation_stops[stop]))*3600*10)/10;
+        speeds.push(speed);
+        var green = Math.min(Math.round(2*255*speed/max_speed), 255);
+        greens.push(green);
+        var red = Math.min(Math.max(0,Math.round(2*255*(1-speed/max_speed))), 255);
+        reds.push(red);
+        segment_colors.push("rgb(" + red +"," + green + ",0)");
+        var total_interstation = interstation_moves[stop] +interstation_stops[stop] + stops_times[stop];
+        total_interstations.push(total_interstation);
+        percs.push(Math.round((total_interstation*100/total_duration)*10)/10);
+    }
+
+    return [interstation_moves, interstation_stops, stops_times, segment_types, durations,
+    speeds, greens, reds, percs, total_interstations, segment_colors, total_duration];
 }
 
 
@@ -278,7 +310,13 @@ function join_ways(relation, xmlDoc){
     return waypoint_refs;
 }
 
-function createBarchart(segment_types, durations, total_duration, names, adj_ctx){
+function createBarchart(segment_types, durations, total_duration, names){
+    var adj_c = document.getElementById("adjCanvas");
+    var adj_ctx = adj_c.getContext("2d");
+    adj_ctx.canvas.width  = window.innerWidth - 30;
+    adj_ctx.clearRect(0, 0, adj_ctx.canvas.width, adj_ctx.canvas.height);
+    adj_ctx.font = "10px Arial";
+
     var current = barstart_x;
     var label_positions = [];
     var interstation_moves = [];
@@ -300,39 +338,10 @@ function createBarchart(segment_types, durations, total_duration, names, adj_ctx
     }
 }
 
-function createChart(timing, stops_lengths, names){
-
-    var adj_c = document.getElementById("adjCanvas");
-    var adj_ctx = adj_c.getContext("2d");
-    adj_ctx.canvas.width  = window.innerWidth - 30;
-    adj_ctx.clearRect(0, 0, adj_ctx.canvas.width, adj_ctx.canvas.height);
-    adj_ctx.font = "10px Arial";
-
+function createTable(headers, names, stops_lengths, total_interstations, stops_times, speeds, percs, reds, greens,
+    total_duration){
     // find total length of the route
     var total_distance = stops_lengths.reduce(function (a, b) { return a + b; }, 0);
-    // process raw timing data
-    var res = processTiming(timing);
-    interstation_moves = res[0];
-    interstation_stops = res[1];
-    stops_times = res[2];
-    segment_types = res[3];
-    durations = res[4];
-
-    var duration, lap;
-
-    // get total duration of laps
-    var total_duration = 0;
-    for(lap = 0; lap < durations.length; lap++){
-        duration = get_seconds(durations[lap]);
-        total_duration += duration;
-    }
-
-    // create bar chart
-    createBarchart(segment_types, durations, total_duration, names, adj_ctx);
-
-    var segment_colors = [];
-
-    console.log(stops_times.length, " stații cronometrate."); // stops_times cam global
 
     var data_table = document.createElement("DIV");
     data_table.className = "datatable";
@@ -340,25 +349,16 @@ function createChart(timing, stops_lengths, names){
     var header_row = document.createElement("DIV");
     header_row.className = "headerrow";
 
-    var headers = ["De la", "La", "Distanță (km)", "Total (s)",
-        "D/c stație (s)", "V (km/h)", "Pondere (%)"];
     add_row(headers, header_row);
     data_table.appendChild(header_row);
 
-
-    for (var stop = 0; stop < names.length - 1; stop++){
+    for (stop = 0; stop < names.length - 1; stop++){
         var data_row = document.createElement("DIV");
         data_row.className = "datarow";
-        var total_interstation = interstation_moves[stop] +interstation_stops[stop] + stops_times[stop];
-        var speed = Math.round((stops_lengths[stop]/(interstation_moves[stop] +interstation_stops[stop]))*3600*10)/10;
-        var green = Math.min(Math.round(2*255*speed/max_speed), 255);
-        var red = Math.min(Math.max(0,Math.round(2*255*(1-speed/max_speed))), 255);
-        var perc = Math.round((total_interstation*100/total_duration)*10)/10;
-        var row_text = [names[stop], names[stop+1], stops_lengths[stop].toFixed(3), total_interstation,
-        stops_times[stop], speed, perc];
+        var row_text = [names[stop], names[stop+1], stops_lengths[stop].toFixed(3), total_interstations[stop],
+        stops_times[stop], speeds[stop], percs[stop]];
         add_row(row_text, data_row);
-        segment_colors.push("rgb(" + red +"," + green + ",0)");
-        data_row.style.backgroundColor = "rgb(" + red +"," + green + ",0)";
+        data_row.style.backgroundColor = "rgb(" + reds[stop] +"," + greens[stop] + ",0)";
         data_table.appendChild(data_row);
     }
     var rezumat = '';
@@ -368,14 +368,13 @@ function createChart(timing, stops_lengths, names){
     displayContents(rezumat);
 
     document.getElementsByTagName('body')[0].insertBefore(data_table, document.getElementById('mapid'));
-    return segment_colors;
 
 }
 
 function makeMap(timing, xmlDoc){
     var names = [];
     //var segments = [];
-    var stops_length = [];
+    var stops_lengths = [];
 
     // create map
     var mymap = L.map('mapid').setView([44.40, 26.1], 13);
@@ -392,12 +391,11 @@ function makeMap(timing, xmlDoc){
     var waypoint_refs = join_ways(relation, xmlDoc);
     // create separate route segments
     var segments = segment_refs(waypoint_refs, stop_refs);
-    console.log('Nr. interstatii: ', segments.length);
     // calculate segment lengths and total distance
     var segm;
     for(var i = 0; i< segments.length; i++){
         segm = segment_length(segments[i], xmlDoc);
-        stops_length.push(segm);
+        stops_lengths.push(segm);
     }
     // get platform names and coordinates
     var p_coords = [];
@@ -407,8 +405,31 @@ function makeMap(timing, xmlDoc){
         platform = xmlDoc.querySelectorAll(selector)[0];
         names.push(platform.querySelectorAll('[k="name"]')[0].getAttribute("v"));
     }
-    // create barchart&table and return segment colors
-    var segment_colors = createChart(timing, stops_length, names);
+
+    // process raw timing data
+    var res = processTiming(timing, stops_lengths);
+    interstation_moves = res[0];
+    interstation_stops = res[1];
+    stops_times = res[2];
+    segment_types = res[3];
+    durations = res[4];
+    speeds = res[5];
+    greens = res[6];
+    reds = res[7];
+    percs = res[8];
+    total_interstations = res[9];
+    segment_colors = res[10];
+    total_duration = res[11];
+
+
+    // create bar chart
+    createBarchart(segment_types, durations, total_duration, names);
+
+    // create data table
+    createTable(headers, names, stops_lengths, total_interstations, stops_times, speeds, percs, reds, greens,
+    total_duration);
+
+
     // add route segments to map
     for(i=0; i<segments.length; i++){
         L.polyline(get_array_coords(segments[i], xmlDoc), {color: segment_colors[i], weight: 3}).addTo(mymap);
@@ -417,8 +438,6 @@ function makeMap(timing, xmlDoc){
     var markers = display_platforms(names, p_coords, mymap); // return markers to fit bounds
     var group = new L.featureGroup(markers);
     mymap.fitBounds(group.getBounds());
-
-    console.log(names.length, " stații descărcate de pe OSM.");
 }
 
 function readTimerFile(e) {
