@@ -1,8 +1,18 @@
+// constants
 var barwidth = 80;
 var barstart_x = 10;
 var barstart_y = 10;
 var text_width = 9;
 var max_speed = 40; //km/h
+var stop_color = 'aqua';
+var red_color = 'red';
+var inter_color = 'green';
+var unknown_color = 'black';
+var stop_letter = '@';
+var red_letter = '*';
+var inter_letter = '+';
+var timer_keyword_time = 'Lap Time';
+var timer_keyword_name = 'Lap Description';
 
 function get_seconds(timestring){
     var a = timestring.split(':');
@@ -80,13 +90,37 @@ function get_array_coords(array, xmlDoc){
     return res;
 }
 
+function segment_refs(waypoint_refs, stop_refs){
+    var left = 0;
+    var right = 0;
+    var started = false;
+    var counter =  0;
+    var segments = [];
+
+    for(p = 0; p < waypoint_refs.length; p++){
+        // try to separate segments between stops
+        if(waypoint_refs[p] === stop_refs[counter]){
+            counter ++;
+            if(started){
+                right = p;
+                segments.push(waypoint_refs.slice(left, right +1));
+                left = p; // starting new segment
+            } else {
+                left = p;
+                started = true;
+            }
+        }
+    }
+    return segments;
+}
+
 function display_platforms(names, coords, mymap){
     // display platforms
     var markers = [];
     var circle;
     for(p = 0; p < names.length; p++){
-        var plat_color = 'blue';
-        var plat_fillColor = '#0000FF';
+        var plat_color = stop_color;
+        var plat_fillColor = stop_color;
         if (p === 0) {
             plat_color = 'green';
             plat_fillColor = 'green';
@@ -107,25 +141,53 @@ function display_platforms(names, coords, mymap){
     return markers;
 }
 
-function process_timing(timing){
-    // create arrays of lap names and durations
-    //TODO hardcoded?
+function processTiming(timing){
     var lines = timing.split('\n');
     var str;
     var durations = [];
     var laps = [];
+    var current = barstart_x;
+    var label_positions = [];
+    var interstation_moves = [];
+    var interstation_stops = [];
+    var stops_times = [];
+    var segment_types = [];
     for(var line = lines.length ; line > 0; line--){
         str = lines[line-1];
-        if (str.startsWith('Lap Time')){
+        if (str.startsWith(timer_keyword_time)){
             str = str.split(': ')[1];
             durations.push(str);
         }
-        if (str.startsWith('Lap Description')){
+        if (str.startsWith(timer_keyword_name)){
             str = str.split(': ')[1];
             laps.push(str);
         }
     }
-    return [durations, laps];
+    for(var lap = 0; lap < laps.length; lap++){
+        str = laps[lap];
+        str = str.substring(0, str.length -1);
+        var abs_duration = get_seconds(durations[lap]);
+        switch (str.substring(0, 1)){
+            case red_letter:
+                segment_types.push(red_color);
+                interstation_stops[interstation_stops.length - 1] += abs_duration;
+                break;
+            case stop_letter:
+                label_positions.push(current);
+                segment_types.push(stop_color);
+                interstation_moves.push(0);
+                interstation_stops.push(0);
+                stops_times.push(abs_duration);
+                break;
+            case inter_letter:
+                segment_types.push(inter_color);
+                interstation_moves[interstation_moves.length - 1] += abs_duration;
+                break;
+            default:
+                segment_types.push(unknown_color);
+        }
+    }
+    return [interstation_moves, interstation_stops, stops_times, segment_types, durations];
 }
 
 
@@ -216,51 +278,29 @@ function join_ways(relation, xmlDoc){
     return waypoint_refs;
 }
 
-function createBarchart(laps, durations, total_duration, names, adj_ctx){
-    // TODO hardcoded?
+function createBarchart(segment_types, durations, total_duration, names, adj_ctx){
     var current = barstart_x;
     var label_positions = [];
     var interstation_moves = [];
     var interstation_stops = [];
     var stops_times = [];
-    for(var lap = 0; lap < laps.length; lap++){
-        var str = laps[lap];
-        str = str.substring(0, str.length -1);
+    for(var lap = 0; lap < durations.length; lap++){
+        if(segment_types[lap] ===  stop_color){
+            label_positions.push(current);
+        }
         var abs_duration = get_seconds(durations[lap]);
         var duration = Math.round(abs_duration * (adj_ctx.canvas.width - 20) / total_duration);
+        addSegment(adj_ctx, duration, segment_types[lap], current, barstart_y, barwidth);
+        current += duration;
 
-        switch (str.substring(0, 1)){
-            case '*':
-                addSegment(adj_ctx, duration, 'red', current, barstart_y, barwidth);
-                current += duration;
-                interstation_stops[interstation_stops.length - 1] += abs_duration;
-                break;
-            case '@':
-                label_positions.push(current);
-                addSegment(adj_ctx, duration, 'aqua', current, barstart_y, 2*barwidth);
-                current += duration;
-                interstation_moves.push(0);
-                interstation_stops.push(0);
-                stops_times.push(abs_duration);
-                break;
-            case '+':
-                addSegment(adj_ctx, duration, 'green', current, barstart_y, barwidth);
-                current += duration;
-                interstation_moves[interstation_moves.length - 1] += abs_duration;
-                break;
-            default:
-                addSegment(adj_ctx, duration, 'black', current, barstart_y, 2*barwidth);
-                current += duration;
-        }
     }
     var stop;
     for (stop = 0; stop < names.length; stop++){
         addLabel(adj_ctx, names[stop], label_positions[stop]);
     }
-    return [interstation_moves, interstation_stops, stops_times];
 }
 
-function createChart(timing, stops_lengths, total_distance, names){
+function createChart(timing, stops_lengths, names){
 
     var adj_c = document.getElementById("adjCanvas");
     var adj_ctx = adj_c.getContext("2d");
@@ -268,25 +308,28 @@ function createChart(timing, stops_lengths, total_distance, names){
     adj_ctx.clearRect(0, 0, adj_ctx.canvas.width, adj_ctx.canvas.height);
     adj_ctx.font = "10px Arial";
 
-
-    var res = process_timing(timing); //get timings
-    var durations = res[0];
-    var laps = res[1];
+    // find total length of the route
+    var total_distance = stops_lengths.reduce(function (a, b) { return a + b; }, 0);
+    // process raw timing data
+    var res = processTiming(timing);
+    interstation_moves = res[0];
+    interstation_stops = res[1];
+    stops_times = res[2];
+    segment_types = res[3];
+    durations = res[4];
 
     var duration, lap;
 
     // get total duration of laps
     var total_duration = 0;
-    for(lap = 0; lap < laps.length; lap++){
+    for(lap = 0; lap < durations.length; lap++){
         duration = get_seconds(durations[lap]);
         total_duration += duration;
     }
 
-    // create chart
-    var result = createBarchart(laps, durations, total_duration, names, adj_ctx);
-    var interstation_moves = result[0];
-    var interstation_stops = result[1];
-    var stops_times = result[2];
+    // create bar chart
+    createBarchart(segment_types, durations, total_duration, names, adj_ctx);
+
     var segment_colors = [];
 
     console.log(stops_times.length, " stații cronometrate."); // stops_times cam global
@@ -307,7 +350,7 @@ function createChart(timing, stops_lengths, total_distance, names){
         var data_row = document.createElement("DIV");
         data_row.className = "datarow";
         var total_interstation = interstation_moves[stop] +interstation_stops[stop] + stops_times[stop];
-        var speed = Math.round((stops_lengths[stop]/(total_interstation-stops_times[stop]))*3600*10)/10;
+        var speed = Math.round((stops_lengths[stop]/(interstation_moves[stop] +interstation_stops[stop]))*3600*10)/10;
         var green = Math.min(Math.round(2*255*speed/max_speed), 255);
         var red = Math.min(Math.max(0,Math.round(2*255*(1-speed/max_speed))), 255);
         var perc = Math.round((total_interstation*100/total_duration)*10)/10;
@@ -325,15 +368,14 @@ function createChart(timing, stops_lengths, total_distance, names){
     displayContents(rezumat);
 
     document.getElementsByTagName('body')[0].insertBefore(data_table, document.getElementById('mapid'));
-    return [stops_times, segment_colors];
+    return segment_colors;
 
 }
 
 function makeMap(timing, xmlDoc){
     var names = [];
-    var segments = [];
-    var new_stops_length = [];
-    var total_distance = 0;
+    //var segments = [];
+    var stops_length = [];
 
     // create map
     var mymap = L.map('mapid').setView([44.40, 26.1], 13);
@@ -348,56 +390,30 @@ function makeMap(timing, xmlDoc){
     var stop_refs = get_refs('stop', relation);
     // join ways to create full route
     var waypoint_refs = join_ways(relation, xmlDoc);
-
-    // create lat and long arrays for the route
-
-    var p_coords = [];
-
-    var left = 0;
-    var right = 0;
-    var started = false;
-    var counter =  0;
-
-    for(p = 0; p < waypoint_refs.length; p++){
-        // try to separate segments between stops
-        if(waypoint_refs[p] === stop_refs[counter]){
-            counter ++;
-            if(started){
-                right = p;
-                segments.push(waypoint_refs.slice(left, right +1));
-                left = p; // starting new segment
-            } else {
-                left = p;
-                started = true;
-            }
-        }
-    }
+    // create separate route segments
+    var segments = segment_refs(waypoint_refs, stop_refs);
     console.log('Nr. interstatii: ', segments.length);
+    // calculate segment lengths and total distance
     var segm;
     for(var i = 0; i< segments.length; i++){
         segm = segment_length(segments[i], xmlDoc);
-        new_stops_length.push(segm);
-        total_distance += segm;
+        stops_length.push(segm);
     }
-    console.log(new_stops_length);
-
     // get platform names and coordinates
+    var p_coords = [];
     for(p = 0; p < plat_refs.length; p++){
         p_coords.push(get_coords(plat_refs[p], xmlDoc));
         selector = '[id="' + plat_refs[p].toString() + '"]';
         platform = xmlDoc.querySelectorAll(selector)[0];
         names.push(platform.querySelectorAll('[k="name"]')[0].getAttribute("v"));
     }
-
-    // create chart and return stop times used to display stops
-    // TODO separate loops to extract  and display data
-    var res = createChart(timing, new_stops_length, total_distance, names);
-    stops_times = res[0];
-    segment_colors = res[1];
+    // create barchart&table and return segment colors
+    var segment_colors = createChart(timing, stops_length, names);
+    // add route segments to map
     for(i=0; i<segments.length; i++){
         L.polyline(get_array_coords(segments[i], xmlDoc), {color: segment_colors[i], weight: 3}).addTo(mymap);
     }
-
+    // add platforms to map
     var markers = display_platforms(names, p_coords, mymap); // return markers to fit bounds
     var group = new L.featureGroup(markers);
     mymap.fitBounds(group.getBounds());
