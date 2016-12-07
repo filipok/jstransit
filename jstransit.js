@@ -149,11 +149,12 @@ function processTiming(timing, stopsLengths){
     var segmentTypes = [];
     for(var line = lines.length ; line > 0; line--){
         str = lines[line-1];
-        if (str.startsWith(timerKeywordTime)){
+        if (str.lastIndexOf(timerKeywordTime, 0) === 0){
             str = str.split(': ')[1];
             durations.push(str);
         }
-        if (str.startsWith(timerKeywordName)){
+        if (str.lastIndexOf(timerKeywordName, 0) === 0){
+        //if (str.startsWith(timerKeywordName)){
             str = str.split(': ')[1];
             laps.push(str);
         }
