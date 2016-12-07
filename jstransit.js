@@ -1,27 +1,27 @@
 // constants
-var barwidth = 80;
-var barstart_x = 10;
-var barstart_y = 10;
-var text_width = 9;
-var max_speed = 40; //km/h
-var stop_color = 'aqua';
-var red_color = 'red';
-var inter_color = 'green';
-var unknown_color = 'black';
-var stop_letter = '@';
-var red_letter = '*';
-var inter_letter = '+';
-var timer_keyword_time = 'Lap Time';
-var timer_keyword_name = 'Lap Description';
+var barWidth = 80; // bar chart width
+var barStartX = 10; // bar chart starting X coordinate
+var barStartY = 10; // bar chart starting Y coordinate
+var textWidth = 9; // bar chart text width
+var maxSpeed = 40; //km/h
+var stopColor = 'aqua'; // bar chart stop bar & map stop circle color
+var redColor = 'red'; // bar chart red light color
+var interColor = 'green'; // bar chart
+var unknownColor = 'black'; // bar chart unknown segment cvolor
+var stopLetter = '@'; // stop letter in timer
+var redLetter = '*'; // red light letter in timer
+var interLetter = '+'; // interstation letter in timer
+var timerKeywordTime = 'Lap Time'; // timer keyword for time record
+var timerKeywordName = 'Lap Description'; // timer keyword for lap description
 var headers = ["De la", "La", "Distanță (km)", "Total (s)",
-        "D/c stație (s)", "V (km/h)", "Pondere (%)"];
+        "D/c stație (s)", "V (km/h)", "Pondere (%)"]; // data table headers
 
-function get_seconds(timestring){
-    var a = timestring.split(':');
+function getSeconds(timeString){
+    var a = timeString.split(':');
     return (+a[0]) * 60 * 60 + (+a[1]) * 60 + Math.round((+a[2]));
 }
 
-function convert_from_seconds(seconds){
+function convertFromSeconds(seconds){
     var minutes = Math.floor(seconds/60);
     seconds = seconds % 60;
     var hours = Math.floor(minutes/60);
@@ -32,17 +32,17 @@ function convert_from_seconds(seconds){
         return hours + ' ore, ' + minutes + ' minute, ' + seconds + ' secunde';}
 }
 
-function addSegment(ctx, increment, color, x_pos, y_pos, bar_width){
+function addSegment(ctx, increment, color, xPos, yPos, barWidth){
     ctx.fillStyle = color;
-    ctx.fillRect(x_pos, y_pos, increment, bar_width);
+    ctx.fillRect(xPos, yPos, increment, barWidth);
 }
 
-function addLabel(ctx, stop_name, position) {
+function addLabel(ctx, stopName, position) {
     ctx.save();
     ctx.fillStyle = "black";
-    ctx.translate(position + text_width, barstart_y + 2*barwidth);
+    ctx.translate(position + textWidth, barStartY + 2*barWidth);
     ctx.rotate(-Math.PI/2);
-    ctx.fillText(stop_name,0, 0);
+    ctx.fillText(stopName,0, 0);
     ctx.restore();
 }
 
@@ -51,32 +51,32 @@ function displayContents(contents) {
     element.innerHTML = contents;
 }
 
-function add_data_cell(text, row) {
-    var data_cell = document.createElement("DIV");
-    data_cell.className = "datacell";
-    var data_text = document.createTextNode(text);
-    data_cell.appendChild(data_text);
+function addDataCell(text, row) {
+    var dataCell = document.createElement("DIV");
+    dataCell.className = "datacell";
+    var dataText = document.createTextNode(text);
+    dataCell.appendChild(dataText);
     //return data_cell;
-    row.appendChild(data_cell);
+    row.appendChild(dataCell);
 }
 
-function add_row(text_arr, row){
-    for(var i = 0; i < text_arr.length; i++){
-    add_data_cell(text_arr[i], row);
+function addRow(textArr, row){
+    for(var i = 0; i < textArr.length; i++){
+    addDataCell(textArr[i], row);
     }
 }
 
-function get_refs(role_name, relation){
-    var ref_list = [];
-    var selector = '[role=' + role_name + ']';
-    var obj_list = relation.querySelectorAll(selector);
-    for(p = 0; p < obj_list.length; p++){
-        ref_list.push(obj_list[p].getAttribute("ref"));
+function getRefs(roleName, relation){
+    var refList = [];
+    var selector = '[role=' + roleName + ']';
+    var objList = relation.querySelectorAll(selector);
+    for(var p = 0; p < objList.length; p++){
+        refList.push(objList[p].getAttribute("ref"));
     }
-    return ref_list;
+    return refList;
 }
 
-function get_coords(ref, xmlDoc){
+function getCoordinates(ref, xmlDoc){
     var selector = '[id="' + ref + '"]';
     var node = xmlDoc.querySelectorAll(selector)[0];
     var lat = parseFloat(node.getAttribute("lat"));
@@ -84,28 +84,28 @@ function get_coords(ref, xmlDoc){
     return [lat, lon];
 }
 
-function get_array_coords(array, xmlDoc){
+function getArrayCoordinates(array, xmlDoc){
     var res = [];
-    for(i=0; i<array.length; i++){
-        res.push(get_coords(array[i], xmlDoc));
+    for(var i=0; i<array.length; i++){
+        res.push(getCoordinates(array[i], xmlDoc));
     }
     return res;
 }
 
-function segment_refs(waypoint_refs, stop_refs){
+function segmentReferences(waypointReferences, stopReferences){
     var left = 0;
     var right = 0;
     var started = false;
     var counter =  0;
     var segments = [];
 
-    for(p = 0; p < waypoint_refs.length; p++){
+    for(var p = 0; p < waypointReferences.length; p++){
         // try to separate segments between stops
-        if(waypoint_refs[p] === stop_refs[counter]){
+        if(waypointReferences[p] === stopReferences[counter]){
             counter ++;
             if(started){
                 right = p;
-                segments.push(waypoint_refs.slice(left, right +1));
+                segments.push(waypointReferences.slice(left, right +1));
                 left = p; // starting new segment
             } else {
                 left = p;
@@ -116,13 +116,13 @@ function segment_refs(waypoint_refs, stop_refs){
     return segments;
 }
 
-function display_platforms(names, coords, mymap){
+function displayPlatforms(names, coordinates, stopsTimes, myMap){
     // display platforms
     var markers = [];
     var circle;
-    for(p = 0; p < names.length; p++){
-        var plat_color = stop_color;
-        var plat_fillColor = stop_color;
+    for(var p = 0; p < names.length; p++){
+        var plat_color = stopColor;
+        var plat_fillColor = stopColor;
         if (p === 0) {
             plat_color = 'green';
             plat_fillColor = 'green';
@@ -131,36 +131,36 @@ function display_platforms(names, coords, mymap){
             plat_color = 'red';
             plat_fillColor = 'red';
         }
-        circle = L.circle([coords[p][0], coords[p][1]], {
+        circle = L.circle([coordinates[p][0], coordinates[p][1]], {
             color: plat_color,
             fillColor: plat_fillColor,
             fillOpacity: 0.5,
-            radius: 15*Math.max(1.5, Math.sqrt(stops_times[p]))
-        }).addTo(mymap)
+            radius: 15*Math.max(1.5, Math.sqrt(stopsTimes[p]))
+        }).addTo(myMap)
             .bindPopup(names[p]);
     markers.push(circle);
     }
     return markers;
 }
 
-function processTiming(timing, stops_lengths){
+function processTiming(timing, stopsLengths){
     var lines = timing.split('\n');
     var str;
     var durations = [];
     var laps = [];
-    var current = barstart_x;
-    var label_positions = [];
-    var interstation_moves = [];
-    var interstation_stops = [];
-    var stops_times = [];
-    var segment_types = [];
+    var current = barStartX;
+    var labelPositions = [];
+    var interstationMoves = [];
+    var interstationStops = [];
+    var stopsTimes = [];
+    var segmentTypes = [];
     for(var line = lines.length ; line > 0; line--){
         str = lines[line-1];
-        if (str.startsWith(timer_keyword_time)){
+        if (str.startsWith(timerKeywordTime)){
             str = str.split(': ')[1];
             durations.push(str);
         }
-        if (str.startsWith(timer_keyword_name)){
+        if (str.startsWith(timerKeywordName)){
             str = str.split(': ')[1];
             laps.push(str);
         }
@@ -168,58 +168,58 @@ function processTiming(timing, stops_lengths){
     for(var lap = 0; lap < laps.length; lap++){
         str = laps[lap];
         str = str.substring(0, str.length -1);
-        var abs_duration = get_seconds(durations[lap]);
+        var absDuration = getSeconds(durations[lap]);
         switch (str.substring(0, 1)){
-            case red_letter:
-                segment_types.push(red_color);
-                interstation_stops[interstation_stops.length - 1] += abs_duration;
+            case redLetter:
+                segmentTypes.push(redColor);
+                interstationStops[interstationStops.length - 1] += absDuration;
                 break;
-            case stop_letter:
-                label_positions.push(current);
-                segment_types.push(stop_color);
-                interstation_moves.push(0);
-                interstation_stops.push(0);
-                stops_times.push(abs_duration);
+            case stopLetter:
+                labelPositions.push(current);
+                segmentTypes.push(stopColor);
+                interstationMoves.push(0);
+                interstationStops.push(0);
+                stopsTimes.push(absDuration);
                 break;
-            case inter_letter:
-                segment_types.push(inter_color);
-                interstation_moves[interstation_moves.length - 1] += abs_duration;
+            case interLetter:
+                segmentTypes.push(interColor);
+                interstationMoves[interstationMoves.length - 1] += absDuration;
                 break;
             default:
-                segment_types.push(unknown_color);
+                segmentTypes.push(unknownColor);
         }
     }
 
     var duration;
     // get total duration of laps
-    var total_duration = 0;
+    var totalDuration = 0;
     for(lap = 0; lap < durations.length; lap++){
-        duration = get_seconds(durations[lap]);
-        total_duration += duration;
+        duration = getSeconds(durations[lap]);
+        totalDuration += duration;
     }
 
 
     var speeds = [];
     var greens = [];
     var reds = [];
-    var percs = [];
-    var total_interstations = [];
-    var segment_colors = [];
-    for (var stop = 0; stop < stops_lengths.length; stop++){
-        var speed = Math.round((stops_lengths[stop]/(interstation_moves[stop] +interstation_stops[stop]))*3600*10)/10;
+    var percents = [];
+    var totalInterstations = [];
+    var segmentColors = [];
+    for (var stop = 0; stop < stopsLengths.length; stop++){
+        var speed = Math.round((stopsLengths[stop]/(interstationMoves[stop] +interstationStops[stop]))*3600*10)/10;
         speeds.push(speed);
-        var green = Math.min(Math.round(2*255*speed/max_speed), 255);
+        var green = Math.min(Math.round(2*255*speed/maxSpeed), 255);
         greens.push(green);
-        var red = Math.min(Math.max(0,Math.round(2*255*(1-speed/max_speed))), 255);
+        var red = Math.min(Math.max(0,Math.round(2*255*(1-speed/maxSpeed))), 255);
         reds.push(red);
-        segment_colors.push("rgb(" + red +"," + green + ",0)");
-        var total_interstation = interstation_moves[stop] +interstation_stops[stop] + stops_times[stop];
-        total_interstations.push(total_interstation);
-        percs.push(Math.round((total_interstation*100/total_duration)*10)/10);
+        segmentColors.push("rgb(" + red +"," + green + ",0)");
+        var totalInterstation = interstationMoves[stop] +interstationStops[stop] + stopsTimes[stop];
+        totalInterstations.push(totalInterstation);
+        percents.push(Math.round((totalInterstation*100/totalDuration)*10)/10);
     }
 
-    return [interstation_moves, interstation_stops, stops_times, segment_types, durations,
-    speeds, greens, reds, percs, total_interstations, segment_colors, total_duration];
+    return [interstationMoves, interstationStops, stopsTimes, segmentTypes, durations,
+    speeds, greens, reds, percents, totalInterstations, segmentColors, totalDuration];
 }
 
 
@@ -227,7 +227,7 @@ Number.prototype.toRad = function() {
    return this * Math.PI / 180;
 };
 
-function two_point_length(lat1, lon1, lat2, lon2){
+function twoPointLength(lat1, lon1, lat2, lon2){
 	// http://stackoverflow.com/questions/14560999/using-the-haversine-formula-in-javascript
 	var R = 6371; // km
 	//has a problem with the .toRad() method below.
@@ -242,202 +242,199 @@ function two_point_length(lat1, lon1, lat2, lon2){
 	return R * c;
 }
 
-function segment_length(segm_array, xmlDoc){
-	var s_length = 0;
-	var start_p = [];
-	var end_p = [];
-	for(var k = 0; k < segm_array.length - 1; k++){
-		start_p = get_coords(segm_array[k], xmlDoc);
-		end_p = get_coords(segm_array[k+1], xmlDoc);
-		s_length += two_point_length(start_p[0], start_p[1], end_p[0], end_p[1]);
+function segmentLength(segmentArray, xmlDoc){
+	var segmentLength = 0;
+	var startPoint = [];
+	var endPoint = [];
+	for(var k = 0; k < segmentArray.length - 1; k++){
+		startPoint = getCoordinates(segmentArray[k], xmlDoc);
+		endPoint = getCoordinates(segmentArray[k+1], xmlDoc);
+		segmentLength += twoPointLength(startPoint[0], startPoint[1], endPoint[0], endPoint[1]);
 	}
-	return s_length;
+	return segmentLength;
 }
 
-function join_ways(relation, xmlDoc){
+function joinWays(relation, xmlDoc){
         // get ways and display route
-    var way_refs = [];
-    var waypoint_refs = [];
+    var wayReferences = [];
+    var waypointReferences = [];
     var ways = relation.querySelectorAll('[type="way"]');
     // get way refs
     for(p = 0; p < ways.length; p++){
-        way_refs.push(ways[p].getAttribute("ref"));
+        wayReferences.push(ways[p].getAttribute("ref"));
     }
     // for each way, get point and add to route
-    for(p = 0; p < way_refs.length; p++){
-        selector = '[id="' + way_refs[p] + '"]';
+    for(var p = 0; p < wayReferences.length; p++){
+        var selector = '[id="' + wayReferences[p] + '"]';
         var way = xmlDoc.querySelectorAll(selector)[0];
-        var way_points = way.getElementsByTagName("nd");
-        var current_points = [];
-        for (var w = 0; w < way_points.length; w ++){
-            var ref = way_points[w].getAttribute("ref");
-            current_points.push(ref);
+        var wayPoints = way.getElementsByTagName("nd");
+        var currentPoints = [];
+        for (var w = 0; w < wayPoints.length; w ++){
+            var ref = wayPoints[w].getAttribute("ref");
+            currentPoints.push(ref);
         }
 
         // first segment
         if(p === 0){
-            waypoint_refs = waypoint_refs.concat(current_points);
+            waypointReferences = waypointReferences.concat(currentPoints);
             continue;
         }
         // last route point === first point of current segment
-        if(waypoint_refs[waypoint_refs.length-1] === current_points[0]){
-            waypoint_refs = waypoint_refs.concat(current_points);
+        if(waypointReferences[waypointReferences.length-1] === currentPoints[0]){
+            waypointReferences = waypointReferences.concat(currentPoints);
             continue;
         }
         // last route point === last point of current segment
-        if(waypoint_refs[waypoint_refs.length-1] === current_points[current_points.length-1]){
-            waypoint_refs = waypoint_refs.concat(current_points.reverse());
+        if(waypointReferences[waypointReferences.length-1] === currentPoints[currentPoints.length-1]){
+            waypointReferences = waypointReferences.concat(currentPoints.reverse());
             continue;
         }
         // first route point === first point  of current segment
         // it can happen only immediately after first segment
-        if(waypoint_refs[0] === current_points[0]){
-            waypoint_refs = waypoint_refs.reverse();
-            waypoint_refs = waypoint_refs.concat(current_points);
+        if(waypointReferences[0] === currentPoints[0]){
+            waypointReferences = waypointReferences.reverse();
+            waypointReferences = waypointReferences.concat(currentPoints);
             continue;
         }
         // first route point === last point of current segment
         // it can happen only immediately after first segment
-        if(waypoint_refs[0] === current_points[current_points.length-1]){
-            waypoint_refs = waypoint_refs.reverse();
-            waypoint_refs = waypoint_refs.concat(current_points.reverse());
+        if(waypointReferences[0] === currentPoints[currentPoints.length-1]){
+            waypointReferences = waypointReferences.reverse();
+            waypointReferences = waypointReferences.concat(currentPoints.reverse());
             continue;
         }
         console.log("ERROR: WAYS NOT CONNECTED!");
         alert("ERROR: WAYS NOT CONNECTED!");
 
     }
-    return waypoint_refs;
+    return waypointReferences;
 }
 
-function createBarchart(segment_types, durations, total_duration, names){
-    var adj_c = document.getElementById("adjCanvas");
-    var adj_ctx = adj_c.getContext("2d");
-    adj_ctx.canvas.width  = window.innerWidth - 30;
-    adj_ctx.clearRect(0, 0, adj_ctx.canvas.width, adj_ctx.canvas.height);
-    adj_ctx.font = "10px Arial";
+function createBarChart(segmentTypes, durations, totalDuration, names){
+    var adjC = document.getElementById("adjCanvas");
+    var adjCtx = adjC.getContext("2d");
+    adjCtx.canvas.width  = window.innerWidth - 30;
+    adjCtx.clearRect(0, 0, adjCtx.canvas.width, adjCtx.canvas.height);
+    adjCtx.font = "10px Arial";
 
-    var current = barstart_x;
-    var label_positions = [];
-    var interstation_moves = [];
-    var interstation_stops = [];
-    var stops_times = [];
+    var current = barStartX;
+    var labelPositions = [];
     for(var lap = 0; lap < durations.length; lap++){
-        if(segment_types[lap] ===  stop_color){
-            label_positions.push(current);
+        if(segmentTypes[lap] ===  stopColor){
+            labelPositions.push(current);
         }
-        var abs_duration = get_seconds(durations[lap]);
-        var duration = Math.round(abs_duration * (adj_ctx.canvas.width - 20) / total_duration);
-        addSegment(adj_ctx, duration, segment_types[lap], current, barstart_y, barwidth);
+        var absDuration = getSeconds(durations[lap]);
+        var duration = Math.round(absDuration * (adjCtx.canvas.width - 20) / totalDuration);
+        addSegment(adjCtx, duration, segmentTypes[lap], current, barStartY, barWidth);
         current += duration;
 
     }
     var stop;
     for (stop = 0; stop < names.length; stop++){
-        addLabel(adj_ctx, names[stop], label_positions[stop]);
+        addLabel(adjCtx, names[stop], labelPositions[stop]);
     }
 }
 
-function createTable(headers, names, stops_lengths, total_interstations, stops_times, speeds, percs, reds, greens,
-    total_duration){
+function createTable(headers, names, stopsLengths, totalInterstations, stopsTimes, speeds, percentss, reds, greens,
+    totalDuration){
     // find total length of the route
-    var total_distance = stops_lengths.reduce(function (a, b) { return a + b; }, 0);
+    var totalDistance = stopsLengths.reduce(function (a, b) { return a + b; }, 0);
 
-    var data_table = document.createElement("DIV");
-    data_table.className = "datatable";
+    var dataTable = document.createElement("DIV");
+    dataTable.className = "datatable";
     // header row
-    var header_row = document.createElement("DIV");
-    header_row.className = "headerrow";
+    var headerRow = document.createElement("DIV");
+    headerRow.className = "headerrow";
 
-    add_row(headers, header_row);
-    data_table.appendChild(header_row);
+    addRow(headers, headerRow);
+    dataTable.appendChild(headerRow);
 
-    for (stop = 0; stop < names.length - 1; stop++){
-        var data_row = document.createElement("DIV");
-        data_row.className = "datarow";
-        var row_text = [names[stop], names[stop+1], stops_lengths[stop].toFixed(3), total_interstations[stop],
-        stops_times[stop], speeds[stop], percs[stop]];
-        add_row(row_text, data_row);
-        data_row.style.backgroundColor = "rgb(" + reds[stop] +"," + greens[stop] + ",0)";
-        data_table.appendChild(data_row);
+    for (var stop = 0; stop < names.length - 1; stop++){
+        var dataRow = document.createElement("DIV");
+        dataRow.className = "datarow";
+        var rowText = [names[stop], names[stop+1], stopsLengths[stop].toFixed(3), totalInterstations[stop],
+        stopsTimes[stop], speeds[stop], percentss[stop]];
+        addRow(rowText, dataRow);
+        dataRow.style.backgroundColor = "rgb(" + reds[stop] +"," + greens[stop] + ",0)";
+        dataTable.appendChild(dataRow);
     }
-    var rezumat = '';
-    rezumat += 'Timp total: ' + convert_from_seconds(total_duration) + '.\n';
-    rezumat += 'Distanță totală: ' + Math.round(total_distance*10)/10 + ' km.\n';
-    rezumat += 'Viteză medie: ' + Math.round((total_distance/total_duration)*3600*10)/10 + ' km/h.\n';
-    displayContents(rezumat);
+    var summary = '';
+    summary += 'Timp total: ' + convertFromSeconds(totalDuration) + '.\n';
+    summary += 'Distanță totală: ' + Math.round(totalDistance*10)/10 + ' km.\n';
+    summary += 'Viteză medie: ' + Math.round((totalDistance/totalDuration)*3600*10)/10 + ' km/h.\n';
+    displayContents(summary);
 
-    document.getElementsByTagName('body')[0].insertBefore(data_table, document.getElementById('mapid'));
+    document.getElementsByTagName('body')[0].insertBefore(dataTable, document.getElementById('mapid'));
 
 }
 
 function makeMap(timing, xmlDoc){
     var names = [];
     //var segments = [];
-    var stops_lengths = [];
+    var stopsLengths = [];
 
     // create map
-    var mymap = L.map('mapid').setView([44.40, 26.1], 13);
+    var myMap = L.map('mapid').setView([44.40, 26.1], 13);
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(mymap);
+    }).addTo(myMap);
 
     // extract relation element
     var relation = xmlDoc.getElementsByTagName("relation")[0];
     // get platform refs and stop position refs
-    var plat_refs = get_refs('platform', relation);
-    var stop_refs = get_refs('stop', relation);
+    var platformReferences = getRefs('platform', relation);
+    var stopReferences = getRefs('stop', relation);
     // join ways to create full route
-    var waypoint_refs = join_ways(relation, xmlDoc);
+    var waypointReferences = joinWays(relation, xmlDoc);
     // create separate route segments
-    var segments = segment_refs(waypoint_refs, stop_refs);
+    var segments = segmentReferences(waypointReferences, stopReferences);
     // calculate segment lengths and total distance
-    var segm;
+    var segment;
     for(var i = 0; i< segments.length; i++){
-        segm = segment_length(segments[i], xmlDoc);
-        stops_lengths.push(segm);
+        segment = segmentLength(segments[i], xmlDoc);
+        stopsLengths.push(segment);
     }
     // get platform names and coordinates
-    var p_coords = [];
-    for(p = 0; p < plat_refs.length; p++){
-        p_coords.push(get_coords(plat_refs[p], xmlDoc));
-        selector = '[id="' + plat_refs[p].toString() + '"]';
-        platform = xmlDoc.querySelectorAll(selector)[0];
+    var platformCoordinates = [];
+    for(var p = 0; p < platformReferences.length; p++){
+        platformCoordinates.push(getCoordinates(platformReferences[p], xmlDoc));
+        var selector = '[id="' + platformReferences[p].toString() + '"]';
+        var platform = xmlDoc.querySelectorAll(selector)[0];
         names.push(platform.querySelectorAll('[k="name"]')[0].getAttribute("v"));
     }
 
     // process raw timing data
-    var res = processTiming(timing, stops_lengths);
-    interstation_moves = res[0];
-    interstation_stops = res[1];
-    stops_times = res[2];
-    segment_types = res[3];
-    durations = res[4];
-    speeds = res[5];
-    greens = res[6];
-    reds = res[7];
-    percs = res[8];
-    total_interstations = res[9];
-    segment_colors = res[10];
-    total_duration = res[11];
+    var res = processTiming(timing, stopsLengths);
+    //var interstationMoves = res[0];
+    //var interstationStops = res[1];
+    var stopsTimes = res[2];
+    var segmentTypes = res[3];
+    var durations = res[4];
+    var speeds = res[5];
+    var greens = res[6];
+    var reds = res[7];
+    var percents = res[8];
+    var totalInterstations = res[9];
+    var segmentColors = res[10];
+    var totalDuration = res[11];
 
 
     // create bar chart
-    createBarchart(segment_types, durations, total_duration, names);
+    createBarChart(segmentTypes, durations, totalDuration, names);
 
     // create data table
-    createTable(headers, names, stops_lengths, total_interstations, stops_times, speeds, percs, reds, greens,
-    total_duration);
+    createTable(headers, names, stopsLengths, totalInterstations, stopsTimes, speeds, percents, reds, greens,
+    totalDuration);
 
 
     // add route segments to map
     for(i=0; i<segments.length; i++){
-        L.polyline(get_array_coords(segments[i], xmlDoc), {color: segment_colors[i], weight: 3}).addTo(mymap);
+        L.polyline(getArrayCoordinates(segments[i], xmlDoc), {color: segmentColors[i], weight: 3}).addTo(myMap);
     }
     // add platforms to map
-    var markers = display_platforms(names, p_coords, mymap); // return markers to fit bounds
+    var markers = displayPlatforms(names, platformCoordinates, stopsTimes, myMap); // return markers to fit bounds
     var group = new L.featureGroup(markers);
-    mymap.fitBounds(group.getBounds());
+    myMap.fitBounds(group.getBounds());
 }
 
 function readTimerFile(e) {
@@ -451,9 +448,9 @@ function readTimerFile(e) {
         // read chosen route
         var r = document.getElementById("route");
         var routeID = r.options[r.selectedIndex].value;
-        var overpass_1 = 'http://overpass-api.de/api/interpreter?data=relation(';
-        var overpass_2 =');out body;>;out body;rel(bn)["public_transport"="stop_area"];out body;';
-        var overpass_full = overpass_1 + routeID + overpass_2;
+        var overpass1 = 'http://overpass-api.de/api/interpreter?data=relation(';
+        var overpass2 =');out body;>;out body;rel(bn)["public_transport"="stop_area"];out body;';
+        var overpass_full = overpass1 + routeID + overpass2;
         //display map and data
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
