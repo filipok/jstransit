@@ -4,7 +4,7 @@ var barStartX = 10; // bar chart starting X coordinate
 var barStartY = 10; // bar chart starting Y coordinate
 var textWidth = 9; // bar chart text width
 var maxSpeed = 40; //km/h
-var stopColor = 'aqua'; // bar chart stop bar & map stop circle color
+var stopColor = 'blue'; // bar chart stop bar & map stop circle color
 var redColor = 'red'; // bar chart red light color
 var interColor = 'green'; // bar chart
 var unknownColor = 'black'; // bar chart unknown segment cvolor
@@ -123,18 +123,19 @@ function displayPlatforms(names, coordinates, stopsTimes, myMap){
     for(var p = 0; p < names.length; p++){
         var plat_color = stopColor;
         var plat_fillColor = stopColor;
-        if (p === 0) {
-            plat_color = 'green';
-            plat_fillColor = 'green';
-        }
-        if (p === names.length -1) {
-            plat_color = 'red';
-            plat_fillColor = 'red';
-        }
+        // if (p === 0) {
+        //     plat_color = 'green';
+        //     plat_fillColor = 'green';
+        // }
+        // if (p === names.length -1) {
+        //     plat_color = 'red';
+        //     plat_fillColor = 'red';
+        // }
         circle = L.circle([coordinates[p][0], coordinates[p][1]], {
             color: plat_color,
+            weight: 2,
             fillColor: plat_fillColor,
-            fillOpacity: 0.5,
+            fillOpacity: 0.1,
             radius: 15*Math.max(1.5, Math.sqrt(stopsTimes[p]))
         }).addTo(myMap)
             .bindPopup(names[p]);
@@ -375,9 +376,15 @@ function makeMap(timing, xmlDoc){
 
     // create map
     var myMap = L.map('mapid').setView([44.40, 26.1], 13);
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+
+    L.tileLayer('http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(myMap);
+
+    // L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    //     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    // }).addTo(myMap);
 
     // extract relation element
     var relation = xmlDoc.getElementsByTagName("relation")[0];
@@ -429,7 +436,7 @@ function makeMap(timing, xmlDoc){
 
     // add route segments to map
     for(i=0; i<segments.length; i++){
-        L.polyline(getArrayCoordinates(segments[i], xmlDoc), {color: segmentColors[i], weight: 3}).addTo(myMap);
+        L.polyline(getArrayCoordinates(segments[i], xmlDoc), {color: segmentColors[i], weight: 5}).addTo(myMap);
     }
     // add platforms to map
     var markers = displayPlatforms(names, platformCoordinates, stopsTimes, myMap); // return markers to fit bounds
