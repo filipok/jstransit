@@ -4,7 +4,9 @@ var barStartX = 10; // bar chart starting X coordinate
 var barStartY = 10; // bar chart starting Y coordinate
 var textWidth = 9; // bar chart text width
 var maxSpeed = 40; //km/h
-var stopColor = 'blue'; // bar chart stop bar & map stop circle color
+var stopColor = 'aqua'; // bar chart stop ar color
+var stopCircleColor = 'blue'; // map stop circle color
+var stopFillColor = 'blue'; // map stop circle fill color
 var redColor = 'red'; // bar chart red light color
 var interColor = 'green'; // bar chart
 var unknownColor = 'black'; // bar chart unknown segment cvolor
@@ -121,20 +123,10 @@ function displayPlatforms(names, coordinates, stopsTimes, myMap){
     var markers = [];
     var circle;
     for(var p = 0; p < names.length; p++){
-        var plat_color = stopColor;
-        var plat_fillColor = stopColor;
-        // if (p === 0) {
-        //     plat_color = 'green';
-        //     plat_fillColor = 'green';
-        // }
-        // if (p === names.length -1) {
-        //     plat_color = 'red';
-        //     plat_fillColor = 'red';
-        // }
         circle = L.circle([coordinates[p][0], coordinates[p][1]], {
-            color: plat_color,
+            color: stopCircleColor,
             weight: 2,
-            fillColor: plat_fillColor,
+            fillColor: stopFillColor,
             fillOpacity: 0.1,
             radius: 15*Math.max(1.5, Math.sqrt(stopsTimes[p]))
         }).addTo(myMap)
