@@ -8,21 +8,22 @@
 </head>
 <body>
 
-<div><canvas id="adjCanvas" width="100" height="180"
+<div>
+    <label for="route">Alege traseul:</label>
+    <select id="route">
+    <option value="3307307" selected="selected">Bus 117: Piața Sfânta Vineri => Cartier Confort Urban</option>
+    <option value="3307287">Bus 117: Cartier Confort Urban => Piața Sfânta Vineri </option>
+  </select>
+  <h4>Încărcare cronometrare: <input type="file" id="timer-file-input" /></h4>
+  <h3>Sumar traseu</h3>
+  <div id="file-content"></div>
+</div>
+
+<div><canvas id="adjCanvas" width="0" height="180"
 style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas></div>
 
-<div>
-<select id="route">
-  <option value="3307307" selected="selected">Bus 117: Piața Sfânta Vineri => Cartier Confort Urban</option>
-  <option value="3307287">Bus 117: Cartier Confort Urban => Piața Sfânta Vineri </option>
-</select>
-<h4>Încărcare cronometrare: <input type="file" id="timer-file-input" /></h4>
-<h3>Sumar traseu:</h3>
-<div id="file-content"></div>
-</div>
-
-<div style="height: 700px; width: auto; margin: 0px;" id="mapid"></div>
+<div style="height: 700px; width: auto; margin: 0;" id="mapid"></div>
 <script src="jstransit.js"></script>
 </body>
 </html>
