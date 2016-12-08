@@ -123,12 +123,16 @@ function displayPlatforms(names, coordinates, stopsTimes, myMap){
     var markers = [];
     var circle;
     for(var p = 0; p < names.length; p++){
+        var stopTime = stopsTimes[p];
+        if (stopTime === undefined){
+            stopTime = 16;
+        }
         circle = L.circle([coordinates[p][0], coordinates[p][1]], {
             color: stopCircleColor,
             weight: 2,
             fillColor: stopFillColor,
             fillOpacity: 0.1,
-            radius: 15*Math.max(1.5, Math.sqrt(stopsTimes[p]))
+            radius: 15*Math.max(1.5, Math.sqrt(stopTime))
         }).addTo(myMap)
             .bindPopup(names[p]);
     markers.push(circle);
@@ -203,8 +207,15 @@ function processTiming(timing, stopsLengths){
         var speed = Math.round((stopsLengths[stop]/(interstationMoves[stop] +interstationStops[stop]))*3600*10)/10;
         speeds.push(speed);
         var green = Math.min(Math.round(2*255*speed/maxSpeed), 255);
+        console.log(green);
+        if(isNaN(green)){
+            green = 0; // TODO
+        }
         greens.push(green);
         var red = Math.min(Math.max(0,Math.round(2*255*(1-speed/maxSpeed))), 255);
+        if(isNaN(red)){
+            red = 0; // TODO
+        }
         reds.push(red);
         segmentColors.push("rgb(" + red +"," + green + ",0)");
         var totalInterstation = interstationMoves[stop] +interstationStops[stop] + stopsTimes[stop];
