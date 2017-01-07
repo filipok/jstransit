@@ -222,8 +222,21 @@ function processTiming(timing, stopsLengths){
         percents.push(Math.round((totalInterstation*100/totalDuration)*10)/10);
     }
 
-    return [interstationMoves, interstationStops, stopsTimes, segmentTypes, durations,
-    speeds, greens, reds, percents, totalInterstations, segmentColors, totalDuration];
+    var res = {
+        interstationMoves: interstationMoves,
+        interstationStops: interstationStops,
+        stopsTimes: stopsTimes,
+        segmentTypes: segmentTypes,
+        durations: durations,
+        speeds: speeds,
+        greens: greens,
+        reds: reds,
+        percents: percents,
+        totalInterstations: totalInterstations,
+        segmentColors: segmentColors,
+        totalDuration: totalDuration
+    };
+    return res;
 }
 
 
@@ -415,34 +428,21 @@ function makeMap(timing, xmlDoc){
 
     // process raw timing data
     var res = processTiming(timing, stopsLengths);
-    //var interstationMoves = res[0];
-    //var interstationStops = res[1];
-    var stopsTimes = res[2];
-    var segmentTypes = res[3];
-    var durations = res[4];
-    var speeds = res[5];
-    var greens = res[6];
-    var reds = res[7];
-    var percents = res[8];
-    var totalInterstations = res[9];
-    var segmentColors = res[10];
-    var totalDuration = res[11];
-
 
     // create bar chart
-    createBarChart(segmentTypes, durations, totalDuration, names);
+    createBarChart(res.segmentTypes, res.durations, res.totalDuration, names);
 
     // create data table
-    createTable(headers, names, stopsLengths, totalInterstations, stopsTimes, speeds, percents, reds, greens,
-    totalDuration);
+    createTable(headers, names, stopsLengths, res.totalInterstations, res.stopsTimes, res.speeds,
+        res.percents, res.reds, res.greens, res.totalDuration);
 
 
     // add route segments to map
     for(i=0; i<segments.length; i++){
-        L.polyline(getArrayCoordinates(segments[i], xmlDoc), {color: segmentColors[i], weight: 5}).addTo(myMap);
+        L.polyline(getArrayCoordinates(segments[i], xmlDoc), {color: res.segmentColors[i], weight: 5}).addTo(myMap);
     }
     // add platforms to map
-    var markers = displayPlatforms(names, platformCoordinates, stopsTimes, myMap); // return markers to fit bounds
+    var markers = displayPlatforms(names, platformCoordinates, res.stopsTimes, myMap); // return markers to fit bounds
     var group = new L.featureGroup(markers);
     myMap.fitBounds(group.getBounds());
 }
