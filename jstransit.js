@@ -247,15 +247,15 @@ function twoPointLength(lat1, lon1, lat2, lon2){
 }
 
 function segmentLength(segmentArray, xmlDoc){
-	var segmentLength = 0;
+	var segmLength = 0;
 	var startPoint = [];
 	var endPoint = [];
 	for(var k = 0; k < segmentArray.length - 1; k++){
 		startPoint = getCoordinates(segmentArray[k], xmlDoc);
 		endPoint = getCoordinates(segmentArray[k+1], xmlDoc);
-		segmentLength += twoPointLength(startPoint[0], startPoint[1], endPoint[0], endPoint[1]);
+		segmLength += twoPointLength(startPoint[0], startPoint[1], endPoint[0], endPoint[1]);
 	}
-	return segmentLength;
+	return segmLength;
 }
 
 function joinWays(relation, xmlDoc){
