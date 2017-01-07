@@ -385,22 +385,9 @@ function createTable(headers, names, stopsLengths, totalInterstations, stopsTime
 
 }
 
-function makeMap(timing, xmlDoc){
+function processRelation(xmlDoc){
     var names = [];
-    //var segments = [];
     var stopsLengths = [];
-
-    // create map
-    var myMap = L.map('mapid').setView([44.40, 26.1], 13);
-
-    L.tileLayer('http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(myMap);
-
-    // L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-    //     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-    // }).addTo(myMap);
 
     // extract relation element
     var relation = xmlDoc.getElementsByTagName("relation")[0];
@@ -426,23 +413,54 @@ function makeMap(timing, xmlDoc){
         names.push(platform.querySelectorAll('[k="name"]')[0].getAttribute("v"));
     }
 
+    var rel = {
+        names: names,
+        segments: segments,
+        platformCoordinates: platformCoordinates,
+        stopsLengths: stopsLengths
+    };
+    return rel;
+
+}
+
+function addRouteToMap(rel, res, L, xmlDoc, myMap){
+    // add route segments to map
+    for(i=0; i<rel.segments.length; i++){
+        L.polyline(getArrayCoordinates(rel.segments[i], xmlDoc), {color: res.segmentColors[i], weight: 5}).addTo(myMap);
+    }
+    // add platforms to map and return markers to fit bounds
+    var markers = displayPlatforms(rel.names, rel.platformCoordinates, res.stopsTimes, myMap);
+    return markers;
+}
+
+function makeMap(timing, xmlDoc){
+
+    // create map
+    var myMap = L.map('mapid').setView([44.40, 26.1], 13);
+    L.tileLayer('http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(myMap);
+    // L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    //     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    // }).addTo(myMap);
+
+    // process XML relation
+    var rel = processRelation(xmlDoc);
+
     // process raw timing data
-    var res = processTiming(timing, stopsLengths);
+    var res = processTiming(timing, rel.stopsLengths);
 
     // create bar chart
-    createBarChart(res.segmentTypes, res.durations, res.totalDuration, names);
+    createBarChart(res.segmentTypes, res.durations, res.totalDuration, rel.names);
 
     // create data table
-    createTable(headers, names, stopsLengths, res.totalInterstations, res.stopsTimes, res.speeds,
+    createTable(headers, rel.names, rel.stopsLengths, res.totalInterstations, res.stopsTimes, res.speeds,
         res.percents, res.reds, res.greens, res.totalDuration);
 
+    // add route to map
+    var markers = addRouteToMap(rel, res, L, xmlDoc, myMap);
 
-    // add route segments to map
-    for(i=0; i<segments.length; i++){
-        L.polyline(getArrayCoordinates(segments[i], xmlDoc), {color: res.segmentColors[i], weight: 5}).addTo(myMap);
-    }
-    // add platforms to map
-    var markers = displayPlatforms(names, platformCoordinates, res.stopsTimes, myMap); // return markers to fit bounds
     var group = new L.featureGroup(markers);
     myMap.fitBounds(group.getBounds());
 }
