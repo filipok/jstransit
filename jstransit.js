@@ -207,7 +207,6 @@ function processTiming(timing, stopsLengths){
         var speed = Math.round((stopsLengths[stop]/(interstationMoves[stop] +interstationStops[stop]))*3600*10)/10;
         speeds.push(speed);
         var green = Math.min(Math.round(2*255*speed/maxSpeed), 255);
-        console.log(green);
         if(isNaN(green)){
             green = 0; // TODO
         }
