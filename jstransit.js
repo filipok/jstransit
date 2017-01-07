@@ -17,6 +17,10 @@ var timerKeywordTime = 'Lap Time'; // timer keyword for time record
 var timerKeywordName = 'Lap Description'; // timer keyword for lap description
 var headers = ["De la", "La", "Distanță (km)", "Total (s)",
         "D/c stație (s)", "V (km/h)", "Pondere (%)"]; // data table headers
+var setViewLat = 44.40;
+var setViewLon = 26.10;
+var setViewZoom = 13;
+var mapid = 'mapid';
 
 function getSeconds(timeString){
     var a = timeString.split(':');
@@ -433,10 +437,8 @@ function addRouteToMap(rel, res, L, xmlDoc, myMap){
     return markers;
 }
 
-function makeMap(timing, xmlDoc){
-
-    // create map
-    var myMap = L.map('mapid').setView([44.40, 26.1], 13);
+function baseMap(L){
+    var myMap = L.map(mapid).setView([setViewLat, setViewLon], setViewZoom);
     L.tileLayer('http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -444,6 +446,13 @@ function makeMap(timing, xmlDoc){
     // L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
     //     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     // }).addTo(myMap);
+    return myMap;
+}
+
+function makeMap(timing, xmlDoc){
+
+    // create base map and return myMap variable
+    var myMap = baseMap(L);
 
     // process XML relation
     var rel = processRelation(xmlDoc);
