@@ -177,8 +177,17 @@ function processRelation(xmlDoc){
     // extract relation element
     var relation = xmlDoc.getElementsByTagName("relation")[0];
     // get platform refs and stop position refs
-    var platformReferences = getRefs('platform', relation);
-    var stopReferences = getRefs('stop', relation);
+    var middle_platformReferences = getRefs('platform', relation);
+    var platform_entry_onlyReferences = getRefs('platform_entry_only', relation);
+    var platform_exit_only_References = getRefs('platform_exit_only', relation);
+    var platformReferences = platform_entry_onlyReferences.concat(
+        middle_platformReferences, platform_exit_only_References);
+    var middle_stopReferences = getRefs('stop', relation);
+    var stop_entry_onlyReferences = getRefs('stop_entry_only', relation);
+    var stop_exit_only_References = getRefs('stop_exit_only', relation);
+    var stopReferences = stop_entry_onlyReferences.concat(
+        middle_stopReferences, stop_exit_only_References);
+
     // join ways to create full route
     var waypointReferences = joinWays(relation, xmlDoc);
     // create separate route segments
