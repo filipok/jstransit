@@ -19,6 +19,12 @@ function getRefs(roleName, relation){
 function getCoordinates(ref, xmlDoc){
     var selector = '[id="' + ref + '"]';
     var node = xmlDoc.querySelectorAll(selector)[0];
+    // if ref (usually a platform) is a way or area instead of a node
+    if (node.tagName == 'way'){
+        var firstNodeRef = node.getElementsByTagName('nd')[0].getAttribute("ref");
+        selector = '[id="' + firstNodeRef + '"]';
+        node = xmlDoc.querySelectorAll(selector)[0];
+    }
     var lat = parseFloat(node.getAttribute("lat"));
     var lon = parseFloat(node.getAttribute("lon"));
     return [lat, lon];
