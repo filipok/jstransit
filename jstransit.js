@@ -113,7 +113,7 @@ function joinWays(relation, xmlDoc){
         // get ways and display route
     var wayReferences = [];
     var waypointReferences = [];
-    var ways = relation.querySelectorAll('[type="way"]'); // TODO doar alea care nu sunt platforma
+    var ways = relation.querySelectorAll('[role=""]'); // the ways in the route have no role
     // get way refs
     for(p = 0; p < ways.length; p++){
         wayReferences.push(ways[p].getAttribute("ref"));
