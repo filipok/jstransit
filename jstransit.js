@@ -16,7 +16,7 @@ function getRefs(roleName, relation){
     return refList;
 }
 
-function getCoordinates(ref, xmlDoc){
+function getCoordinates(ref, xmlDoc, rand = [0,0]){
     var selector = '[id="' + ref + '"]';
     var node = xmlDoc.querySelectorAll(selector)[0];
     // if ref (usually a platform) is a way or area instead of a node
@@ -27,13 +27,13 @@ function getCoordinates(ref, xmlDoc){
     }
     var lat = parseFloat(node.getAttribute("lat"));
     var lon = parseFloat(node.getAttribute("lon"));
-    return [lat, lon];
+    return [lat + rand[0], lon + rand[1]];
 }
 
-function getArrayCoordinates(array, xmlDoc){
+function getArrayCoordinates(array, xmlDoc, rand){
     var res = [];
     for(var i=0; i<array.length; i++){
-        res.push(getCoordinates(array[i], xmlDoc));
+        res.push(getCoordinates(array[i], xmlDoc, rand));
     }
     return res;
 }
@@ -217,8 +217,16 @@ function processRelation(xmlDoc){
 
 function addRouteToMap(rel, res, L, xmlDoc, myMap){
     // add route segments to map
+
+    //slightly randomize position of routes to avoid complete overlap
+    //var rand_lat = (2*Math.random()-1)/2000
+    //var rand_lon = (2*Math.random()-1)/2000
+    var rand_lat = 0;
+    var rand_lon = 0;
+
     for(i=0; i<rel.segments.length; i++){
-        L.polyline(getArrayCoordinates(rel.segments[i], xmlDoc), {color: res.segmentColors[i], weight: 5}).addTo(myMap);
+        L.polyline(getArrayCoordinates(rel.segments[i], xmlDoc, rand = [rand_lat, rand_lon]),
+            {color: res.segmentColors[i], weight: 5}).addTo(myMap);
     }
     // add platforms to map and return markers to fit bounds
     return displayPlatforms(rel.names, rel.platformCoordinates, res.stopsTimes, myMap);
