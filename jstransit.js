@@ -163,9 +163,52 @@ function joinWays(relation, xmlDoc){
             waypointReferences = waypointReferences.concat(currentPoints.reverse());
             continue;
         }
-        console.log("ERROR: WAYS NOT CONNECTED!");
-        alert("ERROR: WAYS NOT CONNECTED!");
 
+        // test for roundabouts
+        // assumptions:
+        //roundabout not last segment and no two roundabouts in a row;
+        //stop not in roundabout
+        var round_select = '[v="roundabout"]';
+        if(way.querySelectorAll(round_select).length > 0){
+            var next_selector = '[id="' + wayReferences[p+1] + '"]';
+            var next_way = xmlDoc.querySelectorAll(next_selector)[0];
+            // get the points of the next way
+            var next_wayPoints = next_way.getElementsByTagName("nd");
+            var nextPoints = [];
+            for (var w = 0; w < next_wayPoints.length; w ++){
+                var ref = next_wayPoints[w].getAttribute("ref");
+                nextPoints.push(ref);
+            }
+            // find roundabout point in the last segment
+            var prev = false;
+            var found_it = false;
+            for (var i = 0; i < currentPoints.length; i++) {
+                if (currentPoints[i] === waypointReferences[waypointReferences.length-1]) {
+                    prev = true;
+                    break;
+                }
+                if (currentPoints[i] === waypointReferences[0]){
+                    prev = true;
+                    waypointReferences = waypointReferences.reverse();
+                    break;
+                }
+            }
+            // find roundabout point in next segment
+            for (var i = 0; i < currentPoints.length; i++) {
+                if (currentPoints[i] === nextPoints[0] ||
+                    currentPoints[i] === nextPoints[nextPoints.length-1]){
+                    found_it = true;
+                    if (prev){
+                        waypointReferences = waypointReferences.concat([currentPoints[i]]);
+                    }
+                    break;
+                }
+            }
+        }
+        if (found_it){
+            continue;
+        }
+        console.log("ERROR: WAYS NOT CONNECTED!");
     }
     return waypointReferences;
 }
