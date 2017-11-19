@@ -116,7 +116,7 @@ function segmentLength(segmentArray, xmlDoc){
 }
 
 function joinWays(relation, xmlDoc){
-        // get ways and display route
+    // get ways and display route
     var wayReferences = [];
     var waypointReferences = [];
     var ways = relation.querySelectorAll('[role=""]'); // the ways in the route have no role
@@ -124,7 +124,7 @@ function joinWays(relation, xmlDoc){
     for(p = 0; p < ways.length; p++){
         wayReferences.push(ways[p].getAttribute("ref"));
     }
-    // for each way, get point and add to route
+    // for each way, get points and add to route
     for(var p = 0; p < wayReferences.length; p++){
         var selector = '[id="' + wayReferences[p] + '"]';
         var way = xmlDoc.querySelectorAll(selector)[0];
@@ -134,6 +134,7 @@ function joinWays(relation, xmlDoc){
             var ref = wayPoints[w].getAttribute("ref");
             currentPoints.push(ref);
         }
+
         // first segment
         if(p === 0){
             waypointReferences = waypointReferences.concat(currentPoints);
