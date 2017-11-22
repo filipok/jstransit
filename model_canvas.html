@@ -26,5 +26,35 @@ Your browser does not support the HTML5 canvas tag.</canvas></div>
 <div style="height: 700px; width: auto; margin: 0;" id="mapid"></div>
 <script src="jstransit.js"></script>
 <script src="jstransit_times.js"></script>
+<script>
+	function readTimerFile(e) {
+    var file = e.target.files[0];
+    if (!file) {
+        return;
+    }
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        var timing = e.target.result;
+        // read chosen route
+        var r = document.getElementById("route");
+        var routeID = r.options[r.selectedIndex].value;
+        var overpass1 = 'http://overpass-api.de/api/interpreter?data=relation(';
+        var overpass2 =');out body;>;out body;rel(bn)["public_transport"="stop_area"];out body;';
+        var overpass_full = overpass1 + routeID + overpass2;
+        //display map and data
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var xmlDoc = this.responseXML;
+                makeMap(timing, xmlDoc);
+            }
+        };
+        xhttp.open("GET", overpass_full, true);
+        xhttp.send();
+    };
+    reader.readAsText(file);
+}
+document.getElementById('timer-file-input').addEventListener('change', readTimerFile, false);
+</script>
 </body>
 </html>
