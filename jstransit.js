@@ -214,12 +214,10 @@ function joinWays(relation, xmlDoc){
     return waypointReferences;
 }
 
-function processRelation(xmlDoc){
+function processRelation(relation, xmlDoc){
     var names = [];
     var stopsLengths = [];
 
-    // extract relation element
-    var relation = xmlDoc.getElementsByTagName("relation")[0];
     // get platform refs and stop position refs
     var middle_platformReferences = getRefs('platform', relation);
     var platform_entry_onlyReferences = getRefs('platform_entry_only', relation);
@@ -250,7 +248,6 @@ function processRelation(xmlDoc){
         var platform = xmlDoc.querySelectorAll(selector)[0];
         names.push(platform.querySelectorAll('[k="name"]')[0].getAttribute("v"));
     }
-
     return {
         names: names,
         segments: segments,
@@ -289,29 +286,31 @@ function baseMap(L){
 }
 
 function addMultipleRoutes(relList, relColors){
-    var myMap = baseMap(L);
-    var relation, xhttp;
-    for(var i=0; i<relList.length; i++){
-        // magic: http://stackoverflow.com/questions/6077357/passing-index-from-for-loop-to-ajax-callback-function-javascript
-        (function(i) {
-            routeID = relList[i];
-            var overpass1 = 'http://overpass-api.de/api/interpreter?data=relation(';
-            var overpass2 =');out body;>;out body;rel(bn)["public_transport"="stop_area"];out body;';
-            var overpass_full = overpass1 + routeID + overpass2;
-            xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    var xmlDoc = this.responseXML;
-                    var rel = processRelation(xmlDoc);
-                    var lengths = rel.names.length;
-                    var res = {};
-                    res.segmentColors = Array(lengths).fill(relColors[i]);
-                    res.stopsTimes = Array(lengths).fill(30);
-                    var markers = addRouteToMap(rel, res, L, xmlDoc, myMap);
-                }
-            };
-            xhttp.open("GET", overpass_full, true);
-            xhttp.send();
-        })(i);
+	var myMap = baseMap(L);
+    var xhttp, rel, res, lengths, markers;
+    var relations = 'http://overpass-api.de/api/interpreter?data=';
+
+	for(var i=0; i<relList.length; i++){
+        relations += 'relation(';
+        relations += relList[i];
+        relations += ');out body;>;out body;';
     }
+	xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var xmlDoc = this.responseXML;
+            var downloadedRelations = xmlDoc.getElementsByTagName("relation");
+            for(var j=0; j<downloadedRelations.length; j++){
+                rel = processRelation(downloadedRelations[j], xmlDoc);
+                lengths = rel.names.length;
+	            res = {};
+	            res.segmentColors = Array(lengths).fill(relColors[j]);
+	            res.stopsTimes = Array(lengths).fill(30);
+	            markers = addRouteToMap(rel, res, L, xmlDoc, myMap);
+            }
+		}
+    };
+    xhttp.open("GET", relations, true);
+    xhttp.send();
 }
+

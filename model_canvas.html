@@ -46,7 +46,8 @@ Your browser does not support the HTML5 canvas tag.</canvas></div>
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 var xmlDoc = this.responseXML;
-                makeMap(timing, xmlDoc);
+                var relation = xmlDoc.getElementsByTagName("relation")[0];
+                makeMap(timing, relation, xmlDoc);
             }
         };
         xhttp.open("GET", overpass_full, true);

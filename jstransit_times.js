@@ -222,13 +222,13 @@ function createTable(headers, names, stopsLengths, totalInterstations, stopsTime
 
 }
 
-function makeMap(timing, xmlDoc){
+function makeMap(timing, relation, xmlDoc){
 
     // create base map and return myMap variable
     var myMap = baseMap(L);
 
     // process XML relation
-    var rel = processRelation(xmlDoc);
+    var rel = processRelation(relation, xmlDoc);
 
     // process raw timing data
     var res = processTiming(timing, rel.stopsLengths);
