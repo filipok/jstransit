@@ -1,0 +1,287 @@
+﻿Timing Data
+
+Timing Description:
+
+Total Time: 01:09:06.4
+
+96 Laps
+
+Lap Description: @Sf. Vineri
+Lap Time: 00:00:00.0
+Lap Total Time: 00:54:32.0
+
+Lap Description: +Lap 69...
+Lap Time: 00:00:33.0
+Lap Total Time: 00:54:11.2
+
+Lap Description: *Lap 68...
+Lap Time: 00:00:41.0
+Lap Total Time: 00:53:38.2
+
+Lap Description: +Lap 67...
+Lap Time: 00:02:05.4
+Lap Total Time: 00:52:57.1
+
+Lap Description: *Lap 66...
+Lap Time: 00:00:17.7
+Lap Total Time: 00:50:51.7
+
+Lap Description: +Lap 65...
+Lap Time: 00:00:58.7
+Lap Total Time: 00:50:33.9
+
+Lap Description: *Lap 64...
+Lap Time: 00:00:33.4
+Lap Total Time: 00:49:35.1
+
+Lap Description: +Lap 63...
+Lap Time: 00:01:26.2
+Lap Total Time: 00:49:01.7
+
+Lap Description: @Matei Basarab
+Lap Time: 00:00:13.8
+Lap Total Time: 00:47:35.4
+
+Lap Description: +Lap 61...
+Lap Time: 00:01:01.9
+Lap Total Time: 00:47:21.5
+
+Lap Description: @Mircea Vodă
+Lap Time: 00:00:14.9
+Lap Total Time: 00:46:19.6
+
+Lap Description: +Lap 59...
+Lap Time: 00:00:33.4
+Lap Total Time: 00:46:04.7
+
+Lap Description: *Lap 58...
+Lap Time: 00:01:19.7
+Lap Total Time: 00:45:31.3
+
+Lap Description: +Lap 57...
+Lap Time: 00:01:29.5
+Lap Total Time: 00:44:11.5
+
+Lap Description: @Bd IC Brătianu
+Lap Time: 00:00:15.3
+Lap Total Time: 00:42:41.9
+
+Lap Description: +Lap 55...
+Lap Time: 00:00:49.7
+Lap Total Time: 00:42:26.6
+
+Lap Description: *Lap 54...
+Lap Time: 00:00:37.2
+Lap Total Time: 00:41:36.8
+
+Lap Description: +Lap 53...
+Lap Time: 00:00:25.2
+Lap Total Time: 00:40:59.6
+
+Lap Description: *Lap 52...
+Lap Time: 00:00:50.1
+Lap Total Time: 00:40:34.4
+
+Lap Description: +Lap 51...
+Lap Time: 00:01:02.5
+Lap Total Time: 00:39:44.2
+
+Lap Description: @Piața Unirii
+Lap Time: 00:00:49.9
+Lap Total Time: 00:38:41.7
+
+Lap Description: +Lap 49...
+Lap Time: 00:03:46.5
+Lap Total Time: 00:37:51.8
+
+Lap Description: @11 Iunie
+Lap Time: 00:00:11.3
+Lap Total Time: 00:34:05.3
+
+Lap Description: +Lap 47...
+Lap Time: 00:01:25.3
+Lap Total Time: 00:33:54.0
+
+Lap Description: @Piața R. Maria
+Lap Time: 00:00:19.0
+Lap Total Time: 00:32:28.6
+
+Lap Description: +Lap 45...
+Lap Time: 00:01:40.9
+Lap Total Time: 00:32:09.5
+
+Lap Description: @Piața Chirigiu
+Lap Time: 00:00:11.8
+Lap Total Time: 00:30:28.6
+
+Lap Description: +Lap 43...
+Lap Time: 00:00:33.6
+Lap Total Time: 00:30:16.8
+
+Lap Description: *Lap 42...
+Lap Time: 00:00:40.0
+Lap Total Time: 00:29:43.1
+
+Lap Description: +Lap 41...
+Lap Time: 00:00:21.9
+Lap Total Time: 00:29:03.1
+
+Lap Description: @Șos. Viilor
+Lap Time: 00:00:10.3
+Lap Total Time: 00:28:41.1
+
+Lap Description: +Lap 39...
+Lap Time: 00:01:24.3
+Lap Total Time: 00:28:30.8
+
+Lap Description: *Lap 38...
+Lap Time: 00:00:58.8
+Lap Total Time: 00:27:06.4
+
+Lap Description: +Lap 37...
+Lap Time: 00:00:32.1
+Lap Total Time: 00:26:07.6
+
+Lap Description: *Lap 36...
+Lap Time: 00:01:02.7
+Lap Total Time: 00:25:35.4
+
+Lap Description: +Lap 35...
+Lap Time: 00:02:14.0
+Lap Total Time: 00:24:32.6
+
+Lap Description: @Șos. Progresului
+Lap Time: 00:00:16.3
+Lap Total Time: 00:22:18.6
+
+Lap Description: +Lap 33...
+Lap Time: 00:00:20.6
+Lap Total Time: 00:22:02.3
+
+Lap Description: *Lap 32...
+Lap Time: 00:01:04.1
+Lap Total Time: 00:21:41.6
+
+Lap Description: +Lap 31...
+Lap Time: 00:00:40.1
+Lap Total Time: 00:20:37.5
+
+Lap Description: *Lap 30...
+Lap Time: 00:00:44.0
+Lap Total Time: 00:19:57.4
+
+Lap Description: +Lap 29...
+Lap Time: 00:00:50.1
+Lap Total Time: 00:19:13.4
+
+Lap Description: *Lap 28...
+Lap Time: 00:00:09.0
+Lap Total Time: 00:18:23.2
+
+Lap Description: +Lap 27...
+Lap Time: 00:00:32.3
+Lap Total Time: 00:18:14.2
+
+Lap Description: @Doina
+Lap Time: 00:00:18.6
+Lap Total Time: 00:17:41.9
+
+Lap Description: +Lap 25...
+Lap Time: 00:01:23.3
+Lap Total Time: 00:17:23.2
+
+Lap Description: @Calea Ferentari
+Lap Time: 00:00:21.8
+Lap Total Time: 00:15:59.9
+
+Lap Description: +Lap 23...
+Lap Time: 00:01:12.9
+Lap Total Time: 00:15:38.0
+
+Lap Description: *Lap 22...hm semafor intermitent galben
+Lap Time: 00:00:23.2
+Lap Total Time: 00:14:25.0
+
+Lap Description: *Lap 21...hm semafor intermitent galben
+Lap Time: 00:00:16.0
+Lap Total Time: 00:14:01.8
+
+Lap Description: +Lap 20...
+Lap Time: 00:00:31.7
+Lap Total Time: 00:13:45.8
+
+Lap Description: *Lap 19...hm semafor intermitent galben
+Lap Time: 00:00:36.2
+Lap Total Time: 00:13:14.0
+
+Lap Description: +Lap 18...
+Lap Time: 00:02:54.0
+Lap Total Time: 00:12:37.7
+
+Lap Description: @Fab. de Pâine
+Lap Time: 00:00:10.3
+Lap Total Time: 00:09:43.6
+
+Lap Description: +Lap 16...
+Lap Time: 00:01:11.9
+Lap Total Time: 00:09:33.3
+
+Lap Description: @Pecineaga
+Lap Time: 00:00:11.7
+Lap Total Time: 00:08:21.3
+
+Lap Description: +Lap 14...
+Lap Time: 00:01:00.4
+Lap Total Time: 00:08:09.6
+
+Lap Description: @Amurgului
+Lap Time: 00:00:16.6
+Lap Total Time: 00:07:09.2
+
+Lap Description: +Lap 12...
+Lap Time: 00:00:17.4
+Lap Total Time: 00:06:52.6
+
+Lap Description: *Lap 11...
+Lap Time: 00:00:45.4
+Lap Total Time: 00:06:35.2
+
+Lap Description: +Lap 10...
+Lap Time: 00:00:53.4
+Lap Total Time: 00:05:49.7
+
+Lap Description: @CC Sălaj
+Lap Time: 00:00:13.4
+Lap Total Time: 00:04:56.3
+
+Lap Description: +Lap 8...
+Lap Time: 00:01:20.5
+Lap Total Time: 00:04:42.8
+
+Lap Description: @Bacău
+Lap Time: 00:00:15.1
+Lap Total Time: 00:03:22.2
+
+Lap Description: +Lap 6...
+Lap Time: 00:00:34.6
+Lap Total Time: 00:03:07.1
+
+Lap Description: @Șos. Sălaj
+Lap Time: 00:00:17.9
+Lap Total Time: 00:02:32.4
+
+Lap Description: +Lap 4...
+Lap Time: 00:00:57.8
+Lap Total Time: 00:02:14.4
+
+Lap Description: @Piața Pucheni
+Lap Time: 00:00:11.2
+Lap Total Time: 00:01:16.6
+
+Lap Description: +Lap 2...
+Lap Time: 00:00:53.0
+Lap Total Time: 00:01:05.4
+
+Lap Description: @CUR
+Lap Time: 00:00:12.3
+Lap Total Time: 00:00:12.3

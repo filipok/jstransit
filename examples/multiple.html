@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+<link rel="stylesheet" href="../jstransit.css" />
+<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+</head>
+<body>
+<div style="height: 1000px; width: auto; margin: 0;" id="mapid"></div>
+<script src="../jstransit.js"></script>
+<script language="javascript">
+//var relList = [358050, 1758849]; //Bus61FFM, Bus43FFM
+//var relList = [3307307, 3307287]; //117BU dus-intors
+//var relList = [1925788, 1247193]; //32BU dus-intors
+//var relList = [357022, 2207120] //21BU dus-întors
+//var relList = [1879820, 412304] //41BU dus-intors
+//var relList = [6644146, 6644147] // 139BU
+//var relList = [6653957, 6653956] //220BU
+//var relList = [3302879, 422228] //102BU
+//var relList = [3927447, 3927355] //133BU
+//var relList = [6657524, 6657523] //300BU
+//var relList = [6657524, 6657523];
+var relList = [1247193, 3307307, 357022, 1879820, 6644147, 6653957, 3302879, 3927447, 6657523] //32, 117, 21, 41, 139, 220, 102, 133, 300
+var relColors = 
+    ["rgb(255,0,0)", "rgb(255,0,0)", 
+    "rgb(255,0,0)", "rgb(255,0,0", 
+    "rgb(0,0,255)", "rgb(0,0,255)",
+    "rgb(255,0,0)", "rgb(0,0,255)", 
+    "rgb(0,0,255)"];
+addMultipleRoutes(relList, relColors);
+</script>
+</body>
+</html>

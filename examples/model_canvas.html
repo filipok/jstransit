@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
-<link rel="stylesheet" href="jstransit.css" />
+<link rel="stylesheet" href="../jstransit.css" />
 <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
 </head>
 <body>
@@ -13,6 +13,8 @@
     <select id="route">
     <option value="3307307" selected="selected">Bus 117: Piața Sfânta Vineri => Cartier Confort Urban</option>
     <option value="3307287">Bus 117: Cartier Confort Urban => Piața Sfânta Vineri </option>
+    <option value="2207120">Tram 21: Pasaj Colentina => Piața Sfântul Gheorghe </option>
+    <option value="1925788">Tram 32: Piața Unirii => Depoul Alexandria </option>
   </select>
   <h4>Încărcare cronometrare: <input type="file" id="timer-file-input" /></h4>
   <h3>Sumar traseu</h3>
@@ -24,8 +26,8 @@ style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas></div>
 
 <div style="height: 700px; width: auto; margin: 0;" id="mapid"></div>
-<script src="jstransit.js"></script>
-<script src="jstransit_times.js"></script>
+<script src="../jstransit.js"></script>
+<script src="../jstransit_times.js"></script>
 <script>
 	function readTimerFile(e) {
     var file = e.target.files[0];

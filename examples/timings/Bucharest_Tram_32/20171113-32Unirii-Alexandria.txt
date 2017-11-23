@@ -1,0 +1,123 @@
+Lap Description: @Depoul Alexandria
+Lap Time: 00:00:00.00
+Lap Total Time: 01:00:02.96
+
+Lap Description: +Lap 67...
+Lap Time: 00:01:10.41
+Lap Total Time: 01:00:02.96
+
+Lap Description: @Antiaeriană
+Lap Time: 00:00:18.40
+Lap Total Time: 00:58:52.55
+
+Lap Description: +Lap 65...
+Lap Time: 00:00:38.90
+Lap Total Time: 00:58:34.15
+
+Lap Description: *Lap 64...
+Lap Time: 00:00:00.99
+Lap Total Time: 00:57:55.25
+
+Lap Description: +Lap 63...
+Lap Time: 00:00:58.58
+Lap Total Time: 00:57:54.26
+
+Lap Description: @Mărgeanului
+Lap Time: 00:00:19.14
+Lap Total Time: 00:56:55.68
+
+Lap Description: +Lap 61...
+Lap Time: 00:01:41.19
+Lap Total Time: 00:56:36.54
+
+Lap Description: @Piața Rahova
+Lap Time: 00:00:22.28
+Lap Total Time: 00:54:55.35
+
+Lap Description: +Lap 59...
+Lap Time: 00:00:30.18
+Lap Total Time: 00:54:33.07
+
+Lap Description: *Lap 58...
+Lap Time: 00:00:22.52
+Lap Total Time: 00:54:02.89
+
+Lap Description: +Lap 57...
+Lap Time: 00:01:48.31
+Lap Total Time: 00:53:40.37
+
+Lap Description: @Petre Ispirescu
+Lap Time: 00:00:20.68
+Lap Total Time: 00:51:52.06
+
+Lap Description: +Lap 55...
+Lap Time: 00:01:31.81
+Lap Total Time: 00:51:31.38
+
+Lap Description: @Calea Ferentari
+Lap Time: 00:00:25.66
+Lap Total Time: 00:49:59.57
+
+Lap Description: +Lap 53...
+Lap Time: 00:00:57.86
+Lap Total Time: 00:49:33.91
+
+Lap Description: @Șoseaua Progresului
+Lap Time: 00:00:14.99
+Lap Total Time: 00:48:36.05
+
+Lap Description: +Lap 51...
+Lap Time: 00:00:33.97
+Lap Total Time: 00:48:21.06
+
+Lap Description: *Lap 50...
+Lap Time: 00:00:22.66
+Lap Total Time: 00:47:47.09
+
+Lap Description: +Lap 49...
+Lap Time: 00:00:48.21
+Lap Total Time: 00:47:24.43
+
+Lap Description: @Piața Chirigiu
+Lap Time: 00:00:14.59
+Lap Total Time: 00:46:36.22
+
+Lap Description: +Lap 47...
+Lap Time: 00:00:54.64
+Lap Total Time: 00:46:21.63
+
+Lap Description: *Lap 46...
+Lap Time: 00:00:14.57
+Lap Total Time: 00:45:26.99
+
+Lap Description: +Lap 45...
+Lap Time: 00:01:41.86
+Lap Total Time: 00:45:12.42
+
+Lap Description: *Lap 44...
+Lap Time: 00:00:09.46
+Lap Total Time: 00:43:30.56
+
+Lap Description: @Piața Regina Maria
+Lap Time: 00:00:11.48
+Lap Total Time: 00:43:21.10
+
+Lap Description: +Lap 42...
+Lap Time: 00:01:07.13
+Lap Total Time: 00:43:09.62
+
+Lap Description: @11 Iunie
+Lap Time: 00:00:09.56
+Lap Total Time: 00:42:02.49
+
+Lap Description: +Lap 40...
+Lap Time: 00:00:02.40
+Lap Total Time: 00:41:52.93
+
+Lap Description: +Lap 39...
+Lap Time: 00:00:55.56
+Lap Total Time: 00:41:50.53
+
+Lap Description: @Piața Unirii
+Lap Time: 00:00:00.00
+Lap Total Time: 00:40:54.97

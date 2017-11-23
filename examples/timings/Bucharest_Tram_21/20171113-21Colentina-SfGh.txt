@@ -1,0 +1,155 @@
+Lap Description: @Piața Sf. Gheorghe
+Lap Time: 00:00:00.00
+Lap Total Time: 00:29:36.16
+
+Lap Description: +Lap 37...
+Lap Time: 00:01:22.93
+Lap Total Time: 00:29:36.16
+
+Lap Description: @Hristo Botev
+Lap Time: 00:00:14.87
+Lap Total Time: 00:28:13.23
+
+Lap Description: +Lap 35...
+Lap Time: 00:02:43.69
+Lap Total Time: 00:27:58.36
+
+Lap Description: @Bulevardul Carol I
+Lap Time: 00:00:15.07
+Lap Total Time: 00:25:14.67
+
+Lap Description: +Lap 33...
+Lap Time: 00:02:01.84
+Lap Total Time: 00:24:59.60
+
+Lap Description: *Lap 32...
+Lap Time: 00:00:41.31
+Lap Total Time: 00:22:57.76
+
+Lap Description: @Mihai Eminescu
+Lap Time: 00:00:18.84
+Lap Total Time: 00:22:16.45
+
+Lap Description: +Lap 30...
+Lap Time: 00:02:16.04
+Lap Total Time: 00:21:57.61
+
+Lap Description: *Lap 29...
+Lap Time: 00:00:30.25
+Lap Total Time: 00:19:41.57
+
+Lap Description: @Bucur Obor
+Lap Time: 00:00:22.59
+Lap Total Time: 00:19:11.32
+
+Lap Description: +Lap 27...
+Lap Time: 00:01:50.55
+Lap Total Time: 00:18:48.73
+
+Lap Description: *Lap 26...
+Lap Time: 00:00:42.36
+Lap Total Time: 00:16:58.18
+
+Lap Description: +Lap 25...
+Lap Time: 00:00:43.19
+Lap Total Time: 00:16:15.82
+
+Lap Description: *Lap 24...
+Lap Time: 00:00:11.68
+Lap Total Time: 00:15:32.63
+
+Lap Description: @Ziduri Moși
+Lap Time: 00:00:17.34
+Lap Total Time: 00:15:20.95
+
+Lap Description: +Lap 22...
+Lap Time: 00:01:12.25
+Lap Total Time: 00:15:03.61
+
+Lap Description: *Lap 21...
+Lap Time: 00:00:24.33
+Lap Total Time: 00:13:51.36
+
+Lap Description: @Teiul Doamnei
+Lap Time: 00:00:15.14
+Lap Total Time: 00:13:27.03
+
+Lap Description: +Lap 19...
+Lap Time: 00:01:40.12
+Lap Total Time: 00:13:11.89
+
+Lap Description: *Lap 18...
+Lap Time: 00:00:57.95
+Lap Total Time: 00:11:31.77
+
+Lap Description: @Doamna Ghica
+Lap Time: 00:00:18.67
+Lap Total Time: 00:10:33.82
+
+Lap Description: +Lap 16...
+Lap Time: 00:01:37.14
+Lap Total Time: 00:10:15.15
+
+Lap Description: @Râul Colentina
+Lap Time: 00:00:14.08
+Lap Total Time: 00:08:38.01
+
+Lap Description: +Lap 14...
+Lap Time: 00:00:45.03
+Lap Total Time: 00:08:23.93
+
+Lap Description: @Cartier Colentina
+Lap Time: 00:00:15.49
+Lap Total Time: 00:07:38.90
+
+Lap Description: +Lap 12...
+Lap Time: 00:00:42.15
+Lap Total Time: 00:07:23.41
+
+Lap Description: +Lap 11...
+Lap Time: 00:00:05.17
+Lap Total Time: 00:06:41.26
+
+Lap Description: *Lap 10...
+Lap Time: 00:00:11.69
+Lap Total Time: 00:06:36.09
+
+Lap Description: +Lap 9...
+Lap Time: 00:00:00.13
+Lap Total Time: 00:06:24.40
+
+Lap Description: +Lap 8...
+Lap Time: 00:01:12.16
+Lap Total Time: 00:06:24.27
+
+Lap Description: @Sportului
+Lap Time: 00:00:09.93
+Lap Total Time: 00:05:12.11
+
+Lap Description: +Lap 6...
+Lap Time: 00:01:01.48
+Lap Total Time: 00:05:02.18
+
+Lap Description: *Lap 5...
+Lap Time: 00:00:20.44
+Lap Total Time: 00:04:00.70
+
+Lap Description: @Cornișor
+Lap Time: 00:00:18.18
+Lap Total Time: 00:03:40.26
+
+Lap Description: +Lap 3...
+Lap Time: 00:01:31.92
+Lap Total Time: 00:03:22.08
+
+Lap Description: @Nicolae Cânea
+Lap Time: 00:00:14.36
+Lap Total Time: 00:01:50.16
+
+Lap Description: +Lap 1...
+Lap Time: 00:01:35.80
+Lap Total Time: 00:01:35.80
+
+Lap Description: @Pasaj Colentina
+Lap Time: 00:00:00.00
+Lap Total Time: 00:00:00.00
