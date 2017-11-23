@@ -39,7 +39,7 @@ Your browser does not support the HTML5 canvas tag.</canvas></div>
         var r = document.getElementById("route");
         var routeID = r.options[r.selectedIndex].value;
         var overpass1 = 'http://overpass-api.de/api/interpreter?data=relation(';
-        var overpass2 =');out body;>;out body;rel(bn)["public_transport"="stop_area"];out body;';
+        var overpass2 =');out body;>;out body;';
         var overpass_full = overpass1 + routeID + overpass2;
         //display map and data
         var xhttp = new XMLHttpRequest();
