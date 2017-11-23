@@ -1,5 +1,5 @@
 # jstransit
-jstransit uses [Leaflet](http://leafletjs.com/) to display public transport relations ([v2]http://wiki.openstreetmap.org/wiki/Proposed_features/Public_Transport)) from Openstreetmap using the [Overpass API](http://wiki.openstreetmap.org/wiki/Overpass_API). 
+jstransit uses [Leaflet](http://leafletjs.com/) to display public transport relations ([v2](http://wiki.openstreetmap.org/wiki/Proposed_features/Public_Transport)) from Openstreetmap using the [Overpass API](http://wiki.openstreetmap.org/wiki/Overpass_API). 
 If you time a certain PT route, you can use jstransit to display the speed for each segment and various other statistics.
 
 # Examples
