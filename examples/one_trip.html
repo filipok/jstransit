@@ -307,7 +307,10 @@ xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
         var xmlDoc = this.responseXML;
         var relation = xmlDoc.getElementsByTagName("relation")[0];
-        makeMap(timing, relation, xmlDoc);
+        var mapObjects = addTimedRelation(timing, relation, xmlDoc);
+        var linesLayer = new L.featureGroup(mapObjects[0]).addTo(myMap);
+        var platformsLayer = new L.featureGroup(mapObjects[1]).addTo(myMap);
+        myMap.fitBounds(platformsLayer.getBounds());
     }
 };
 xhttp.open("GET", overpass_full, true);

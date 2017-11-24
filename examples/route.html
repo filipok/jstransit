@@ -16,8 +16,6 @@
     <option value="2207120">Tram 21: Pasaj Colentina => Piața Sfântul Gheorghe </option>
     <option value="1925788">Tram 32: Piața Unirii => Depoul Alexandria </option>
   </select>
-  <br>
-  <button type="button" id="backup-button" onclick="clearMap()">Clear map</button>
   <h4>Încărcare cronometrare: <input type="file" id="timer-file-input" /></h4>
   <h3>Sumar traseu</h3>
   <div id="file-content"></div>
@@ -31,13 +29,6 @@ Your browser does not support the HTML5 canvas tag.</canvas></div>
 <script src="../jstransit.js"></script>
 <script src="../jstransit_times.js"></script>
 <script>
-	function clearMap(){
-        myMap.removeLayer(linesLayer);
-        myMap.removeLayer(platformLayer);
-        platforms = [];
-        lines = [];
-    }
-
     function readTimerFile(e) {
     var file = e.target.files[0];
     if (!file) {
@@ -58,16 +49,17 @@ Your browser does not support the HTML5 canvas tag.</canvas></div>
         if (element != null) {
             element.parentNode.removeChild(element);
         }
-
+        
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 var xmlDoc = this.responseXML;
                 var relation = xmlDoc.getElementsByTagName("relation")[0];
                 var mapObjects = addTimedRelation(timing, relation, xmlDoc);
-                platforms = platforms.concat(mapObjects[1]);
-                lines = lines.concat(mapObjects[0]);
+                platforms =mapObjects[1];
+                lines = mapObjects[0];
                 if (linesLayer != null){
+                    console.log('aici');
                     myMap.removeLayer(linesLayer);
                     myMap.removeLayer(platformsLayer);
                 }

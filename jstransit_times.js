@@ -223,10 +223,7 @@ function createTable(headers, names, stopsLengths, totalInterstations, stopsTime
 
 }
 
-function makeMap(timing, relation, xmlDoc){
-
-    // create base map and return myMap variable
-    //var myMap = baseMap(L);
+function addTimedRelation(timing, relation, xmlDoc){
 
     // process XML relation
     var rel = processRelation(relation, xmlDoc);
@@ -241,9 +238,9 @@ function makeMap(timing, relation, xmlDoc){
     createTable(headers, rel.names, rel.stopsLengths, res.totalInterstations, res.stopsTimes, res.speeds,
         res.percents, res.reds, res.greens, res.totalDuration);
 
-    // add route to map
-    var markers = addRouteToMap(rel, res, L, xmlDoc, myMap);
-
-    var group = new L.featureGroup(markers);
-    myMap.fitBounds(group.getBounds());
+    // create map objects
+    var lines = addRouteToMap(rel, res, L, xmlDoc, myMap);
+    var platforms = displayPlatforms(rel.names,
+            rel.platformCoordinates, res.stopsTimes, myMap);
+    return [lines, platforms];
 }

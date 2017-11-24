@@ -77,8 +77,7 @@ function displayPlatforms(names, coordinates, stopsTimes, myMap){
             fillColor: stopFillColor,
             fillOpacity: 0.1,
             radius: 15*Math.max(1.5, Math.sqrt(stopTime))
-        }).addTo(myMap)
-            .bindPopup(names[p]);
+        }).bindPopup(names[p]);
     markers.push(circle);
     }
     return markers;
@@ -264,13 +263,13 @@ function addRouteToMap(rel, res, L, xmlDoc, myMap){
     //var rand_lon = (2*Math.random()-1)/2000
     var rand_lat = 0;
     var rand_lon = 0;
+    var lines = [];
 
     for(i=0; i<rel.segments.length; i++){
-        L.polyline(getArrayCoordinates(rel.segments[i], xmlDoc, rand = [rand_lat, rand_lon]),
-            {color: res.segmentColors[i], weight: 5}).addTo(myMap);
+        lines = lines.concat(L.polyline(getArrayCoordinates(rel.segments[i], xmlDoc, rand = [rand_lat, rand_lon]),
+            {color: res.segmentColors[i], weight: 5}));
     }
-    // add platforms to map and return markers to fit bounds
-    return displayPlatforms(rel.names, rel.platformCoordinates, res.stopsTimes, myMap);
+    return lines;
 }
 
 function baseMap(L){
@@ -288,6 +287,8 @@ function baseMap(L){
 function addMultipleRoutes(relList, relColors){
 	var myMap = baseMap(L);
     var xhttp, rel, res, lengths, markers;
+    var platforms = [];
+    var lines = [];
     var relations = 'http://overpass-api.de/api/interpreter?data=';
 
 	for(var i=0; i<relList.length; i++){
@@ -306,11 +307,13 @@ function addMultipleRoutes(relList, relColors){
 	            res = {};
 	            res.segmentColors = Array(lengths).fill(relColors[j]);
 	            res.stopsTimes = Array(lengths).fill(30);
-	            markers = addRouteToMap(rel, res, L, xmlDoc, myMap);
+	            lines = lines.concat(addRouteToMap(rel, res, L, xmlDoc, myMap));
+                platforms = platforms.concat(displayPlatforms(rel.names, rel.platformCoordinates, res.stopsTimes, myMap));
             }
+            var linesLayer = new L.featureGroup(lines).addTo(myMap);
+            var platformsLayer = new L.featureGroup(platforms).addTo(myMap);
 		}
     };
     xhttp.open("GET", relations, true);
     xhttp.send();
 }
-
