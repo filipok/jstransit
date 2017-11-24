@@ -196,6 +196,7 @@ function createTable(headers, names, stopsLengths, totalInterstations, stopsTime
 
     var dataTable = document.createElement("DIV");
     dataTable.className = "datatable";
+    dataTable.id = 'datatable';
     // header row
     var headerRow = document.createElement("DIV");
     headerRow.className = "headerrow";
@@ -225,7 +226,7 @@ function createTable(headers, names, stopsLengths, totalInterstations, stopsTime
 function makeMap(timing, relation, xmlDoc){
 
     // create base map and return myMap variable
-    var myMap = baseMap(L);
+    //var myMap = baseMap(L);
 
     // process XML relation
     var rel = processRelation(relation, xmlDoc);

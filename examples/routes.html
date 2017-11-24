@@ -43,6 +43,13 @@ Your browser does not support the HTML5 canvas tag.</canvas></div>
         var overpass1 = 'http://overpass-api.de/api/interpreter?data=relation(';
         var overpass2 =');out body;>;out body;';
         var overpass_full = overpass1 + routeID + overpass2;
+        // clear existing statistics, if any
+        document.getElementById('adjCanvas').innerHTML = 'Your browser does not support the HTML5 canvas tag.';
+        console.log(document.getElementById("datatable"));
+        var element = document.getElementById("datatable");
+        if (element != null) {
+            element.parentNode.removeChild(element);
+        }
         //display map and data
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
@@ -58,6 +65,7 @@ Your browser does not support the HTML5 canvas tag.</canvas></div>
     reader.readAsText(file);
 }
 document.getElementById('timer-file-input').addEventListener('change', readTimerFile, false);
+var myMap = baseMap(L);
 </script>
 </body>
 </html>

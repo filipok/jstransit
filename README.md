@@ -12,6 +12,7 @@ See several examples in the examples folder:
 - document timing format (but you have some examples)
 - add route tooltip
 - document other stuff
+- add ability to clear map in routes.html
 
 # Screenshots
 ![multiple routes](examples/screenshots/01.PNG)
