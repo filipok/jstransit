@@ -3,7 +3,7 @@ jstransit uses [Leaflet](http://leafletjs.com/) to display public transport rela
 If you time a certain PT route, you can use jstransit to display the speed for each segment and various other statistics.
 
 # Examples
-See in the examples folder several examples:
+See several examples in the examples folder:
 - [multiple.html](examples/multiple.html) displays several public transport relations in Bucharest, Romania;
 - [one_trip.html](examples/one_trip.html) displays statistics for a trip made with Bus 117 in Bucharest in October 2016;
 - [routes.html](examples/routes.html) lets you choose a PT relation and a timing file from [examples/timings](examples/timings) to display statistics for the trip. 
