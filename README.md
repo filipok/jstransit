@@ -5,7 +5,7 @@ If you time a certain PT route, you can use jstransit to display the speed for e
 # Examples
 See several examples in the examples folder:
 - [multiple.html](examples/multiple.html) displays several public transport relations in Bucharest, Romania;
-- [one_trip.html](examples/one_trip.html) displays statistics for a trip made with Bus 117 in Bucharest in October 2016;
+- [examples timings](examples/trip_timing) display statistics for trips made with Bus 117 in Bucharest in October 2016;
 - [route.html](examples/route.html) lets you choose a PT relation and a timing file from [examples/timings](examples/timings) to display statistics for the trip;
 - [routes.html](examples/routes.html) same as above, and you can also display multiple routes, see the fifth screenshot below; there is also a button to clear the map.
 
