@@ -17,4 +17,4 @@ See in the examples folder several examples:
 ![multiple routes](examples/screenshots/01.PNG)
 ![station tooltip](examples/screenshots/02.PNG)
 ![stats](examples/screenshots/03.PNG)
-![choose route and timing](examples/screenshots/04.PNG)
+![choose route and timing](examples/screenshots/04.png)
