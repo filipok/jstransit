@@ -174,7 +174,6 @@ function joinWays(relation, stopReferences, xmlDoc){
                 for (var n = 0; n < currentPoints.length; n++){
                     if (stopReferences[s] === currentPoints[n]){
                         waypointReferences = waypointReferences.concat([currentPoints[n]]);
-                        console.log('found stop in roundabout');
                     }
                 }
 
