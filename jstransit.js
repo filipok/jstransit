@@ -114,8 +114,23 @@ function segmentLength(segmentArray, xmlDoc){
 	return segmLength;
 }
 
+
+function getPointsNextWay(way_ref, xmlDoc){
+	// get the points of the next way
+    var next_selector = '[id="' + way_ref + '"]';
+    var next_way = xmlDoc.querySelectorAll(next_selector)[0];
+    var next_wayPoints = next_way.getElementsByTagName("nd");
+    var nextPoints = [];
+    for (var w = 0; w < next_wayPoints.length; w ++){
+        var ref = next_wayPoints[w].getAttribute("ref");
+        nextPoints.push(ref);
+    }
+    return nextPoints;
+}
+
 function joinWays(relation, stopReferences, xmlDoc){
     // get ways and display route
+    var prev, found_it;
     var wayReferences = [];
     var waypointReferences = [];
     var ways = relation.querySelectorAll('[role=""]'); // the ways in the route have no role
@@ -134,29 +149,60 @@ function joinWays(relation, stopReferences, xmlDoc){
             currentPoints.push(ref);
         }
 
-        // first segment
-        if(p === 0){
-            waypointReferences = waypointReferences.concat(currentPoints);
-            continue;
-        }
-
         // test for roundabouts
         // assumptions:
-        //roundabout not first/last segment and no two roundabouts in a row;
+        // no two circular roundabouts in a row;
         var round_select = '[v="roundabout"]';
         if(way.querySelectorAll(round_select).length > 0){
-            var next_selector = '[id="' + wayReferences[p+1] + '"]';
-            var next_way = xmlDoc.querySelectorAll(next_selector)[0];
-            // get the points of the next way
-            var next_wayPoints = next_way.getElementsByTagName("nd");
-            var nextPoints = [];
-            for (var w = 0; w < next_wayPoints.length; w ++){
-                var ref = next_wayPoints[w].getAttribute("ref");
-                nextPoints.push(ref);
+
+            //A. roundabout first segment
+            if(p === 0) {
+                //find stops in this first roundabout and add them to waypointReferences
+                //there should be at least one and usually just that one
+                for (var s = 0; s < stopReferences.length; s++){
+	                var should_break = true;
+	                for (var n = 0; n < currentPoints.length; n++){
+	                    if (stopReferences[s] === currentPoints[n]){
+	                        waypointReferences = waypointReferences.concat([currentPoints[n]]);
+                            should_break = false;
+	                    }
+	                }
+	                // if  stop not found in  current iteration, then break loop
+	                // as stops are ordered
+	                if (should_break){
+	                    break;
+	                }
+                }
+	            var nextPoints = getPointsNextWay(wayReferences[p+1], xmlDoc);
+	            // find roundabout point in next segment and add it to waypointReferences
+	            for (var i = 0; i < currentPoints.length; i++) {
+	                if (currentPoints[i] === nextPoints[0] ||
+	                    currentPoints[i] === nextPoints[nextPoints.length-1]){
+	                    waypointReferences = waypointReferences.concat([currentPoints[i]]);
+	                    break;
+	                }
+	            }
+	            continue;
             }
+
+            //B. roundabout last segment
+            if(p === wayReferences.length -1){
+                //in this case, just add stops located in this last roundabout
+                for (var s = 0; s < stopReferences.length; s++){
+	                for (var n = 0; n < currentPoints.length; n++){
+	                    if (stopReferences[s] === currentPoints[n]){
+	                        waypointReferences = waypointReferences.concat([currentPoints[n]]);
+	                    }
+	                }
+                }
+                continue;
+            }
+
+            //C. roundabout somewhere in the middle
+            var nextPoints = getPointsNextWay(wayReferences[p+1], xmlDoc);
             // find roundabout point in the last segment
-            var prev = false; // true if found point connecting with previous segment
-            var found_it = false; // true to continue
+            prev = false; // true if found point connecting with previous segment
+            found_it = false; // true to continue
             for (var i = 0; i < currentPoints.length; i++) {
                 if (currentPoints[i] === waypointReferences[waypointReferences.length-1]) {
                     prev = true;
@@ -164,35 +210,43 @@ function joinWays(relation, stopReferences, xmlDoc){
                 }
                 if (currentPoints[i] === waypointReferences[0]){
                     prev = true;
+                    //this can happen only after the first segment, I suppose
                     waypointReferences = waypointReferences.reverse();
                     break;
                 }
             }
 
             // test if there are stops in the current roundabout O(n^2) :-|
+            //and add them to waypointReferences
             for (var s = 0; s < stopReferences.length; s++){
                 for (var n = 0; n < currentPoints.length; n++){
                     if (stopReferences[s] === currentPoints[n]){
                         waypointReferences = waypointReferences.concat([currentPoints[n]]);
                     }
                 }
-
             }
 
             // find roundabout point in next segment
             for (var i = 0; i < currentPoints.length; i++) {
                 if (currentPoints[i] === nextPoints[0] ||
                     currentPoints[i] === nextPoints[nextPoints.length-1]){
-                    found_it = true;
+                    // only add point if previously the roundabout point in last segment was found
+                    //otherwise segments might be unconnected
                     if (prev){
+                        found_it = true;
                         waypointReferences = waypointReferences.concat([currentPoints[i]]);
                     }
                     break;
                 }
             }
+            if (found_it){
+                continue;
+            }
         }
-        if (found_it){
-            found_it = false;
+
+        // first segment (non-roundabout)
+        if(p === 0){
+            waypointReferences = waypointReferences.concat(currentPoints);
             continue;
         }
 
