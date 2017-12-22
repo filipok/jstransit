@@ -13,8 +13,8 @@ var redLetter = '*'; // red light letter in timer
 var interLetter = '+'; // interstation letter in timer
 var timerKeywordTime = 'Lap Time'; // timer keyword for time record
 var timerKeywordName = 'Lap Description'; // timer keyword for lap description
-var headers = ["De la", "La", "Distanță (km)", "Total (s)",
-        "D/c stație (s)", "V (km/h)", "Pondere (%)"]; // data table headers
+var headers = ['De la', 'La', 'Distanță (km)', 'Total (s)',
+    'D/c stație (s)', 'V (km/h)', 'Pondere (%)']; // data table headers
 
 function getSeconds(timeString){
     var a = timeString.split(':');
@@ -39,7 +39,7 @@ function addSegment(ctx, increment, color, xPos, yPos, barWidth){
 
 function addLabel(ctx, stopName, position) {
     ctx.save();
-    ctx.fillStyle = "black";
+    ctx.fillStyle = 'black';
     ctx.translate(position + textWidth, barStartY + 2*barWidth);
     ctx.rotate(-Math.PI/2);
     ctx.fillText(stopName,0, 0);
@@ -52,8 +52,8 @@ function displayContents(contents) {
 }
 
 function addDataCell(text, row) {
-    var dataCell = document.createElement("DIV");
-    dataCell.className = "datacell";
+    var dataCell = document.createElement('DIV');
+    dataCell.className = 'datacell';
     var dataText = document.createTextNode(text);
     dataCell.appendChild(dataText);
     //return data_cell;
@@ -62,7 +62,7 @@ function addDataCell(text, row) {
 
 function addRow(textArr, row){
     for(var i = 0; i < textArr.length; i++){
-    addDataCell(textArr[i], row);
+        addDataCell(textArr[i], row);
     }
 }
 
@@ -94,23 +94,23 @@ function processTiming(timing, stopsLengths){
         str = str.substring(0, str.length -1);
         var absDuration = getSeconds(durations[lap]);
         switch (str.substring(0, 1)){
-            case redLetter:
-                segmentTypes.push(redColor);
-                interstationStops[interstationStops.length - 1] += absDuration;
-                break;
-            case stopLetter:
-                labelPositions.push(current);
-                segmentTypes.push(stopColor);
-                interstationMoves.push(0);
-                interstationStops.push(0);
-                stopsTimes.push(absDuration);
-                break;
-            case interLetter:
-                segmentTypes.push(interColor);
-                interstationMoves[interstationMoves.length - 1] += absDuration;
-                break;
-            default:
-                segmentTypes.push(unknownColor);
+        case redLetter:
+            segmentTypes.push(redColor);
+            interstationStops[interstationStops.length - 1] += absDuration;
+            break;
+        case stopLetter:
+            labelPositions.push(current);
+            segmentTypes.push(stopColor);
+            interstationMoves.push(0);
+            interstationStops.push(0);
+            stopsTimes.push(absDuration);
+            break;
+        case interLetter:
+            segmentTypes.push(interColor);
+            interstationMoves[interstationMoves.length - 1] += absDuration;
+            break;
+        default:
+            segmentTypes.push(unknownColor);
         }
     }
 
@@ -142,7 +142,7 @@ function processTiming(timing, stopsLengths){
             red = 0; // TODO
         }
         reds.push(red);
-        segmentColors.push("rgb(" + red +"," + green + ",0)");
+        segmentColors.push('rgb(' + red +',' + green + ',0)');
         var totalInterstation = interstationMoves[stop] +interstationStops[stop] + stopsTimes[stop];
         totalInterstations.push(totalInterstation);
         percents.push(Math.round((totalInterstation*100/totalDuration)*10)/10);
@@ -165,11 +165,11 @@ function processTiming(timing, stopsLengths){
 }
 
 function createBarChart(segmentTypes, durations, totalDuration, names){
-    var adjC = document.getElementById("adjCanvas");
-    var adjCtx = adjC.getContext("2d");
+    var adjC = document.getElementById('adjCanvas');
+    var adjCtx = adjC.getContext('2d');
     adjCtx.canvas.width  = window.innerWidth - 30;
     adjCtx.clearRect(0, 0, adjCtx.canvas.width, adjCtx.canvas.height);
-    adjCtx.font = "10px Arial";
+    adjCtx.font = '10px Arial';
 
     var current = barStartX;
     var labelPositions = [];
@@ -194,23 +194,23 @@ function createTable(headers, names, stopsLengths, totalInterstations, stopsTime
     // find total length of the route
     var totalDistance = stopsLengths.reduce(function (a, b) { return a + b; }, 0);
 
-    var dataTable = document.createElement("DIV");
-    dataTable.className = "datatable";
+    var dataTable = document.createElement('DIV');
+    dataTable.className = 'datatable';
     dataTable.id = 'datatable';
     // header row
-    var headerRow = document.createElement("DIV");
-    headerRow.className = "headerrow";
+    var headerRow = document.createElement('DIV');
+    headerRow.className = 'headerrow';
 
     addRow(headers, headerRow);
     dataTable.appendChild(headerRow);
 
     for (var stop = 0; stop < names.length - 1; stop++){
-        var dataRow = document.createElement("DIV");
-        dataRow.className = "datarow";
+        var dataRow = document.createElement('DIV');
+        dataRow.className = 'datarow';
         var rowText = [names[stop], names[stop+1], stopsLengths[stop].toFixed(3), totalInterstations[stop],
-        stopsTimes[stop], speeds[stop], percentss[stop]];
+            stopsTimes[stop], speeds[stop], percentss[stop]];
         addRow(rowText, dataRow);
-        dataRow.style.backgroundColor = "rgb(" + reds[stop] +"," + greens[stop] + ",0)";
+        dataRow.style.backgroundColor = 'rgb(' + reds[stop] +',' + greens[stop] + ',0)';
         dataTable.appendChild(dataRow);
     }
     var summary = '';
@@ -242,6 +242,6 @@ function addTimedRelation(timing, relation, xmlDoc){
     var randomize = false; //do not slightly randomize route position
     var lines = addRouteToMap(rel, res, L, xmlDoc, myMap, randomize);
     var platforms = displayPlatforms(rel.names,
-            rel.platformCoordinates, res.stopsTimes, myMap);
+        rel.platformCoordinates, res.stopsTimes, myMap);
     return [lines, platforms];
 }
