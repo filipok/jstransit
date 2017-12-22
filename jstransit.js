@@ -24,7 +24,7 @@ function getCoordinates(ref, xmlDoc){
     var selector = '[id="' + ref + '"]';
     var node = xmlDoc.querySelectorAll(selector)[0];
     // if ref (usually a platform) is a way or area instead of a node
-    if (node.tagName == 'way'){
+    if (node.tagName === 'way'){
         var firstNodeRef = node.getElementsByTagName('nd')[0].getAttribute("ref");
         selector = '[id="' + firstNodeRef + '"]';
         node = xmlDoc.querySelectorAll(selector)[0];
@@ -69,7 +69,7 @@ function segmentReferences(waypointReferences, stopReferences){
     return segments;
 }
 
-function displayPlatforms(names, coordinates, stopsTimes, myMap){
+function displayPlatforms(names, coordinates, stopsTimes){
     // display platforms
     var markers = [];
     var circle;
@@ -166,9 +166,9 @@ function joinWays(relation, stopReferences, xmlDoc){
             if(p === 0) {
                 //find stops in this first roundabout and add them to waypointReferences
                 //there should be at least one and usually just that one
-                for (var s = 0; s < stopReferences.length; s++){
+                for (s = 0; s < stopReferences.length; s++){
 	                var should_break = true;
-	                for (var n = 0; n < currentPoints.length; n++){
+	                for (n = 0; n < currentPoints.length; n++){
 	                    if (stopReferences[s] === currentPoints[n]){
 	                        waypointReferences = waypointReferences.concat([currentPoints[n]]);
                             should_break = false;
@@ -180,9 +180,9 @@ function joinWays(relation, stopReferences, xmlDoc){
 	                    break;
 	                }
                 }
-	            var nextPoints = getPointsNextWay(wayReferences[p+1], xmlDoc);
+	            nextPoints = getPointsNextWay(wayReferences[p+1], xmlDoc);
 	            // find roundabout point in next segment and add it to waypointReferences
-	            for (var i = 0; i < currentPoints.length; i++) {
+	            for (i = 0; i < currentPoints.length; i++) {
 	                if (currentPoints[i] === nextPoints[0] ||
 	                    currentPoints[i] === nextPoints[nextPoints.length-1]){
 	                    waypointReferences = waypointReferences.concat([currentPoints[i]]);
@@ -195,8 +195,8 @@ function joinWays(relation, stopReferences, xmlDoc){
             //B. roundabout last segment
             if(p === wayReferences.length -1){
                 //in this case, just add stops located in this last roundabout
-                for (var s = 0; s < stopReferences.length; s++){
-	                for (var n = 0; n < currentPoints.length; n++){
+                for (s = 0; s < stopReferences.length; s++){
+	                for (n = 0; n < currentPoints.length; n++){
 	                    if (stopReferences[s] === currentPoints[n]){
 	                        waypointReferences = waypointReferences.concat([currentPoints[n]]);
 	                    }
@@ -210,7 +210,7 @@ function joinWays(relation, stopReferences, xmlDoc){
             // find roundabout point in the last segment
             prev = false; // true if found point connecting with previous segment
             found_it = false; // true to continue
-            for (var i = 0; i < currentPoints.length; i++) {
+            for (i = 0; i < currentPoints.length; i++) {
                 if (currentPoints[i] === waypointReferences[waypointReferences.length-1]) {
                     prev = true;
                     break;
@@ -330,7 +330,7 @@ function processRelation(relation, xmlDoc){
     };
 }
 
-function addRouteToMap(rel, res, L, xmlDoc, myMap, randomize){
+function addRouteToMap(rel, res, L, xmlDoc, randomize){
     // add route segments to map
 
     //slightly randomize position of routes to avoid complete overlap
@@ -344,7 +344,7 @@ function addRouteToMap(rel, res, L, xmlDoc, myMap, randomize){
     var rand = [rand_lat, rand_lon];
     var lines = [];
 
-    for(i=0; i<rel.segments.length; i++){
+    for(var i=0; i<rel.segments.length; i++){
         lines = lines.concat(L.polyline(getArrayCoordinates(rel.segments[i], xmlDoc, rand),
             {color: res.segmentColors[i], weight: 5}));
     }
@@ -365,7 +365,7 @@ function baseMap(L){
 
 function addMultipleRoutes(relList, relColors, randomize){
 	var myMap = baseMap(L);
-    var xhttp, rel, res, lengths, markers;
+    var xhttp, rel, res, lengths;
     var platforms = [];
     var lines = [];
     var relations = 'http://overpass-api.de/api/interpreter?data=';
@@ -377,15 +377,15 @@ function addMultipleRoutes(relList, relColors, randomize){
     }
 	xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState === 4 && this.status === 200) {
             var xmlDoc = this.responseXML;
             var downloadedRelations = xmlDoc.getElementsByTagName("relation");
             for(var j=0; j<downloadedRelations.length; j++){
                 rel = processRelation(downloadedRelations[j], xmlDoc);
                 lengths = rel.names.length;
 	            res = {};
-	            res.segmentColors = Array(lengths).fill(relColors[j]);
-	            res.stopsTimes = Array(lengths).fill(30);
+	            res.segmentColors = new Array(lengths).fill(relColors[j]);
+	            res.stopsTimes = new Array(lengths).fill(30);
 	            lines = lines.concat(addRouteToMap(rel, res, L, xmlDoc, myMap, randomize));
                 platforms = platforms.concat(displayPlatforms(rel.names, rel.platformCoordinates, res.stopsTimes, myMap));
             }
