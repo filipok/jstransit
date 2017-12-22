@@ -390,7 +390,7 @@ function addMultipleRoutes(relList, relColors, randomize){
                     res.segmentColors[i]=relColors[j];
                     res.stopsTimes=30;
                 }
-	            lines = lines.concat(addRouteToMap(rel, res, L, xmlDoc, myMap, randomize));
+	            lines = lines.concat(addRouteToMap(rel, res, L, xmlDoc, randomize));
                 platforms = platforms.concat(displayPlatforms(rel.names, rel.platformCoordinates, res.stopsTimes, myMap));
             }
             var linesLayer = new L.featureGroup(lines).addTo(myMap);
