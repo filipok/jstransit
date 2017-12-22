@@ -239,7 +239,8 @@ function addTimedRelation(timing, relation, xmlDoc){
         res.percents, res.reds, res.greens, res.totalDuration);
 
     // create map objects
-    var lines = addRouteToMap(rel, res, L, xmlDoc, myMap);
+    var randomize = false; //do not slightly randomize route position
+    var lines = addRouteToMap(rel, res, L, xmlDoc, myMap, randomize);
     var platforms = displayPlatforms(rel.names,
             rel.platformCoordinates, res.stopsTimes, myMap);
     return [lines, platforms];

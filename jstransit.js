@@ -16,7 +16,11 @@ function getRefs(roleName, relation){
     return refList;
 }
 
-function getCoordinates(ref, xmlDoc, rand = [0,0]){
+function offsetCoordinates(coords, rand){
+    return [coords[0] + rand[0], coords[1] + rand[1]];
+}
+
+function getCoordinates(ref, xmlDoc){
     var selector = '[id="' + ref + '"]';
     var node = xmlDoc.querySelectorAll(selector)[0];
     // if ref (usually a platform) is a way or area instead of a node
@@ -27,13 +31,16 @@ function getCoordinates(ref, xmlDoc, rand = [0,0]){
     }
     var lat = parseFloat(node.getAttribute("lat"));
     var lon = parseFloat(node.getAttribute("lon"));
-    return [lat + rand[0], lon + rand[1]];
+    return [lat, lon];
 }
+
 
 function getArrayCoordinates(array, xmlDoc, rand){
     var res = [];
+    var temp;
     for(var i=0; i<array.length; i++){
-        res.push(getCoordinates(array[i], xmlDoc, rand));
+        temp = getCoordinates(array[i], xmlDoc);
+        res.push(offsetCoordinates(temp, rand));
     }
     return res;
 }
@@ -323,18 +330,22 @@ function processRelation(relation, xmlDoc){
     };
 }
 
-function addRouteToMap(rel, res, L, xmlDoc, myMap){
+function addRouteToMap(rel, res, L, xmlDoc, myMap, randomize){
     // add route segments to map
 
     //slightly randomize position of routes to avoid complete overlap
-    //var rand_lat = (2*Math.random()-1)/2000
-    //var rand_lon = (2*Math.random()-1)/2000
     var rand_lat = 0;
     var rand_lon = 0;
+    if(randomize){
+        rand_lat = (2*Math.random()-1)/2000;
+        rand_lon = (2*Math.random()-1)/2000;
+    }
+
+    var rand = [rand_lat, rand_lon];
     var lines = [];
 
     for(i=0; i<rel.segments.length; i++){
-        lines = lines.concat(L.polyline(getArrayCoordinates(rel.segments[i], xmlDoc, rand = [rand_lat, rand_lon]),
+        lines = lines.concat(L.polyline(getArrayCoordinates(rel.segments[i], xmlDoc, rand),
             {color: res.segmentColors[i], weight: 5}));
     }
     return lines;
@@ -352,7 +363,7 @@ function baseMap(L){
     return myMap;
 }
 
-function addMultipleRoutes(relList, relColors){
+function addMultipleRoutes(relList, relColors, randomize){
 	var myMap = baseMap(L);
     var xhttp, rel, res, lengths, markers;
     var platforms = [];
@@ -375,7 +386,7 @@ function addMultipleRoutes(relList, relColors){
 	            res = {};
 	            res.segmentColors = Array(lengths).fill(relColors[j]);
 	            res.stopsTimes = Array(lengths).fill(30);
-	            lines = lines.concat(addRouteToMap(rel, res, L, xmlDoc, myMap));
+	            lines = lines.concat(addRouteToMap(rel, res, L, xmlDoc, myMap, randomize));
                 platforms = platforms.concat(displayPlatforms(rel.names, rel.platformCoordinates, res.stopsTimes, myMap));
             }
             var linesLayer = new L.featureGroup(lines).addTo(myMap);
