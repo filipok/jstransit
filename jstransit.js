@@ -384,8 +384,12 @@ function addMultipleRoutes(relList, relColors, randomize){
                 rel = processRelation(downloadedRelations[j], xmlDoc);
                 lengths = rel.names.length;
 	            res = {};
-	            res.segmentColors = new Array(lengths).fill(relColors[j]);
-	            res.stopsTimes = new Array(lengths).fill(30);
+                res.segmentColors = new Array(lengths);
+                res.stopsTimes = new Array(lengths);
+                for(var i = 0; i<lengths; i++){
+                    res.segmentColors[i]=relColors[j];
+                    res.stopsTimes=30;
+                }
 	            lines = lines.concat(addRouteToMap(rel, res, L, xmlDoc, myMap, randomize));
                 platforms = platforms.concat(displayPlatforms(rel.names, rel.platformCoordinates, res.stopsTimes, myMap));
             }
